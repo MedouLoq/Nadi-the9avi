@@ -1,0 +1,459 @@
+{% extends 'base.html' %}
+
+{% block title %}تأكيد رمز التحقق - منصة التصويت{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-lg fade-in">
+            <div class="card-header text-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-mobile-alt ms-2"></i>
+                    تأكيد رقم هاتفك
+                </h4>
+                <p class="mb-0 mt-2 text-white-50">أدخل رمز التحقق المُرسل إلى +222{{ phone_number|slice:"4:" }}</p>
+            </div>
+            <div class="card-body">
+                <div class="registration-steps mb-4">
+                    <div class="step completed">
+                        <div class="step-number">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="step-text">رقم الهاتف</div>
+                    </div>
+                    <div class="step-line completed"></div>
+                    <div class="step active">
+                        <div class="step-number">2</div>
+                        <div class="step-text">تأكيد OTP</div>
+                    </div>
+                </div>
+                
+                <form method="post" id="otpForm">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="otp_code" class="form-label">
+                            <i class="fas fa-key ms-2"></i>رمز التحقق
+                        </label>
+                        <input type="text" class="form-control text-center otp-input" id="otp_code" name="otp_code" 
+                               placeholder="123456" maxlength="6" required
+                               pattern="\d{6}" title="أدخل رمز التحقق المكون من 6 أرقام"
+                               autocomplete="one-time-code">
+                        <div class="form-text text-center">
+                            <i class="fas fa-clock ms-1"></i>
+                            الرمز ينتهي خلال <span id="countdown">5:00</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">
+                            <i class="fas fa-lock ms-2"></i>إنشاء كلمة مرور
+                        </label>
+                        <div class="input-group">
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="fas fa-eye" id="eyeIcon"></i>
+                            </button>
+                            <input type="password" class="form-control" id="password" name="password" 
+                                   placeholder="أنشئ كلمة مرور آمنة" required minlength="6">
+                        </div>
+                        <div class="password-strength">
+                            <div class="strength-bar">
+                                <div class="strength-fill" id="strengthFill"></div>
+                            </div>
+                            <small id="strengthText" class="form-text">قوة كلمة المرور: <span id="strengthLevel">ضعيفة</span></small>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="confirm_password" class="form-label">
+                            <i class="fas fa-lock ms-2"></i>تأكيد كلمة المرور
+                        </label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" 
+                               placeholder="أكد كلمة المرور" required>
+                        <div class="invalid-feedback" id="passwordMismatch">
+                            كلمات المرور غير متطابقة
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 mb-3">
+                        <button type="submit" class="btn btn-primary btn-lg" id="verifyBtn" >
+                            <i class="fas fa-check-circle ms-2"></i>
+                            إكمال التسجيل
+                        </button>
+                    </div>
+                </form>
+                
+                <hr class="my-3">
+                
+                <div class="text-center">
+                    <p class="mb-2">لم تستلم الرمز؟</p>
+                    <button type="button" class="btn btn-outline-primary" id="resendBtn" onclick="resendOTP()">
+                        <i class="fas fa-redo ms-2"></i>
+                        إعادة إرسال
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Help Section -->
+        <div class="card mt-4 border-0" style="background: rgba(255, 255, 255, 0.7);">
+            <div class="card-body">
+                <h6 class="card-title text-primary">
+                    <i class="fas fa-question-circle ms-2"></i>
+                    تحتاج مساعدة؟
+                </h6>
+                <ul class="list-unstyled small text-muted mb-0">
+                    <li><i class="fas fa-check ms-2 text-success"></i>تحقق من رسائلك للحصول على الرمز المكون من 6 أرقام</li>
+                    <li><i class="fas fa-check ms-2 text-success"></i>الرمز صالح لمدة 5 دقائق</li>
+                    <li><i class="fas fa-check ms-2 text-success"></i>استخدم كلمة مرور قوية تحتوي على 6 أحرف على الأقل</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .registration-steps {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 2rem;
+    }
+
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+    }
+
+    .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+        font-family: 'Cairo', sans-serif;
+    }
+
+    .step.active .step-number {
+        background: var(--gradient-blue);
+        color: white;
+        box-shadow: 0 4px 15px var(--shadow-blue);
+    }
+
+    .step.completed .step-number {
+        background: #10b981;
+        color: white;
+    }
+
+    .step-text {
+        font-size: 0.8rem;
+        color: #64748b;
+        font-weight: 500;
+        font-family: 'Cairo', sans-serif;
+    }
+
+    .step.active .step-text {
+        color: var(--primary-blue);
+        font-weight: 600;
+    }
+
+    .step.completed .step-text {
+        color: #10b981;
+        font-weight: 600;
+    }
+
+    .step-line {
+        height: 2px;
+        background: #e2e8f0;
+        flex: 1;
+        margin: 0 1rem;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .step-line.completed {
+        background: #10b981;
+    }
+
+    .otp-input {
+        font-size: 1.5rem;
+        letter-spacing: 0.5rem;
+        font-weight: 600;
+        font-family: 'Cairo', sans-serif;
+    }
+
+    .password-strength {
+        margin-top: 0.5rem;
+    }
+
+    .strength-bar {
+        height: 4px;
+        background: #e2e8f0;
+        border-radius: 2px;
+        overflow: hidden;
+        margin-bottom: 0.25rem;
+    }
+
+    .strength-fill {
+        height: 100%;
+        width: 0%;
+        transition: all 0.3s ease;
+        border-radius: 2px;
+    }
+
+    .strength-weak { background: #ef4444; }
+    .strength-fair { background: #f59e0b; }
+    .strength-good { background: #3b82f6; }
+    .strength-strong { background: #10b981; }
+
+    #countdown {
+        font-weight: 600;
+        color: var(--primary-blue);
+    }
+
+    .countdown-warning {
+        color: #ef4444 !important;
+        animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let countdownTimer;
+    let timeLeft = 300; // 5 minutes in seconds
+
+    // Start countdown
+    function startCountdown() {
+        countdownTimer = setInterval(function() {
+            timeLeft--;
+            updateCountdownDisplay();
+            
+            if (timeLeft <= 0) {
+                clearInterval(countdownTimer);
+                handleCountdownExpired();
+            }
+        }, 1000);
+    }
+
+    function updateCountdownDisplay() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        const display = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        
+        const countdownElement = document.getElementById('countdown');
+        countdownElement.textContent = display;
+        
+        // Add warning styling when less than 1 minute
+        if (timeLeft <= 60) {
+            countdownElement.classList.add('countdown-warning');
+        }
+    }
+
+    function handleCountdownExpired() {
+        document.getElementById('countdown').textContent = 'انتهت الصلاحية';
+        document.getElementById('verifyBtn').disabled = true;
+        document.getElementById('otp_code').disabled = true;
+        
+        // Show expiry message
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-danger';
+        alertDiv.innerHTML = '<i class="fas fa-exclamation-triangle ms-2"></i>انتهت صلاحية رمز التحقق. يرجى طلب رمز جديد.';
+        document.querySelector('.card-body').insertBefore(alertDiv, document.querySelector('form'));
+    }
+
+    // Toggle password visibility
+    document.getElementById('togglePassword').addEventListener('click', function() {
+        const passwordInput = document.getElementById('password');
+        const eyeIcon = document.getElementById('eyeIcon');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            eyeIcon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            eyeIcon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    });
+
+    // Password strength checker
+    document.getElementById('password').addEventListener('input', function(e) {
+        const password = e.target.value;
+        const strengthFill = document.getElementById('strengthFill');
+        const strengthLevel = document.getElementById('strengthLevel');
+        
+        let strength = 0;
+        let level = 'ضعيفة';
+        let className = 'strength-weak';
+        
+        if (password.length >= 6) strength++;
+        if (password.match(/[a-z]/)) strength++;
+        if (password.match(/[A-Z]/)) strength++;
+        if (password.match(/[0-9]/)) strength++;
+        if (password.match(/[^a-zA-Z0-9]/)) strength++;
+        
+        switch(strength) {
+            case 0:
+            case 1:
+                level = 'ضعيفة';
+                className = 'strength-weak';
+                strengthFill.style.width = '25%';
+                break;
+            case 2:
+                level = 'متوسطة';
+                className = 'strength-fair';
+                strengthFill.style.width = '50%';
+                break;
+            case 3:
+                level = 'جيدة';
+                className = 'strength-good';
+                strengthFill.style.width = '75%';
+                break;
+            case 4:
+            case 5:
+                level = 'قوية';
+                className = 'strength-strong';
+                strengthFill.style.width = '100%';
+                break;
+        }
+        
+        strengthFill.className = `strength-fill ${className}`;
+        strengthLevel.textContent = level;
+    });
+
+    // Password confirmation validation
+    document.getElementById('confirm_password').addEventListener('input', function(e) {
+        const password = document.getElementById('password').value;
+        const confirmPassword = e.target.value;
+        
+        if (confirmPassword.length > 0) {
+            if (password === confirmPassword) {
+                e.target.classList.remove('is-invalid');
+                e.target.classList.add('is-valid');
+            } else {
+                e.target.classList.remove('is-valid');
+                e.target.classList.add('is-invalid');
+            }
+        } else {
+            e.target.classList.remove('is-valid', 'is-invalid');
+        }
+    });
+
+    // OTP input formatting
+    document.getElementById('otp_code').addEventListener('input', function(e) {
+        // Only allow digits
+        e.target.value = e.target.value.replace(/\D/g, '');
+        
+        // Auto-focus validation
+        if (e.target.value.length === 6) {
+            e.target.classList.remove('is-invalid');
+            e.target.classList.add('is-valid');
+        } else {
+            e.target.classList.remove('is-valid');
+            if (e.target.value.length > 0) {
+                e.target.classList.add('is-invalid');
+            }
+        }
+    });
+
+    // Resend OTP function
+    async function resendOTP() {
+        const resendBtn = document.getElementById('resendBtn');
+        const originalText = resendBtn.innerHTML;
+        
+        resendBtn.innerHTML = '<i class="fas fa-spinner fa-spin ms-2"></i>جاري الإرسال...';
+        resendBtn.disabled = true;
+        
+        try {
+            const response = await fetch('{% url "resend_otp" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Reset countdown
+                clearInterval(countdownTimer);
+                timeLeft = 300;
+                startCountdown();
+                
+                // Reset form elements
+                document.getElementById('verifyBtn').disabled = false;
+                document.getElementById('otp_code').disabled = false;
+                document.querySelector('.alert-danger')?.remove();
+                
+                // Show success message
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-success';
+                alertDiv.innerHTML = '<i class="fas fa-check ms-2"></i>تم إرسال رمز جديد بنجاح!';
+                document.querySelector('.card-body').insertBefore(alertDiv, document.querySelector('form'));
+                
+                // Auto-remove after 3 seconds
+                setTimeout(() => alertDiv.remove(), 3000);
+            } else {
+                throw new Error(data.message);
+            }
+        } catch (error) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger';
+            alertDiv.innerHTML = `<i class="fas fa-exclamation-triangle ms-2"></i>${error.message || 'فشل في إرسال رمز التحقق'}`;
+            document.querySelector('.card-body').insertBefore(alertDiv, document.querySelector('form'));
+        }
+        
+        resendBtn.innerHTML = originalText;
+        resendBtn.disabled = false;
+    }
+
+    // Initialize countdown on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        startCountdown();
+        
+        // Focus on OTP input
+        document.getElementById('otp_code').focus();
+    });
+
+    // Form validation before submit
+    document.getElementById('otpForm').addEventListener('submit', function(e) {
+        const otpCode = document.getElementById('otp_code').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+        
+        if (otpCode.length !== 6) {
+            e.preventDefault();
+            document.getElementById('otp_code').focus();
+            return false;
+        }
+        
+        if (password.length < 6) {
+            e.preventDefault();
+            document.getElementById('password').focus();
+            return false;
+        }
+        
+        if (password !== confirmPassword) {
+            e.preventDefault();
+            document.getElementById('confirm_password').focus();
+            return false;
+        }
+    });
+</script>
+{% endblock %}
+                  

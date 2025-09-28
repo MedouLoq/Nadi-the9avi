@@ -1,0 +1,654 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}منصة التصويت{% endblock %}</title>
+    
+    <!-- Bootstrap 5 RTL CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.rtl.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Arabic Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@200;300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        .navbar-brand {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    padding: 0;
+}
+
+.club-logo {
+    width: 50px;
+    height: 50px;
+    margin-left: 10px; /* RTL: margin on left */
+    flex-shrink: 0; /* Prevent logo from shrinking */
+}
+
+.club-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Maintains aspect ratio */
+    display: block;
+}
+
+.club-name {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: white !important;
+    white-space: nowrap; /* Prevent text wrapping */
+}
+
+/* Tablet styles (768px - 992px) */
+@media (max-width: 991px) and (min-width: 768px) {
+    .club-logo {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .club-name {
+        font-size: 1.1rem;
+    }
+}
+
+/* Mobile styles (less than 768px) */
+@media (max-width: 767px) {
+    .club-logo {
+        width: 40px;
+        height: 40px;
+        margin-left: 8px;
+    }
+    
+    .club-name {
+        font-size: 1rem;
+    }
+}
+
+/* Very small mobile (less than 400px) */
+@media (max-width: 399px) {
+    .club-logo {
+        width: 35px;
+        height: 35px;
+        margin-left: 6px;
+    }
+    
+    .club-name {
+        font-size: 0.9rem;
+        /* Allow text to wrap on very small screens */
+        white-space: normal;
+        line-height: 1.2;
+    }
+}
+
+/* Optional: Hide text on extremely small screens */
+@media (max-width: 320px) {
+    .club-name {
+        display: none; /* Hide text, show only logo */
+    }
+    
+    .club-logo {
+        width: 40px;
+        height: 40px;
+        margin-left: 0;
+    }
+}
+
+/* Ensure logo doesn't get distorted */
+.club-logo img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Add hover effect */
+.navbar-brand:hover .club-logo {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+}
+
+/* If logo has transparency, add background */
+.club-logo {
+    background: white;
+    border-radius: 50%;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Dark mode / Light mode compatibility */
+@media (prefers-color-scheme: dark) {
+    .club-logo {
+        background: rgba(255, 255, 255, 0.9);
+    }
+}
+        :root {
+            --primary-blue: #2563eb;
+            --secondary-blue: #1e40af;
+            --light-blue: #3b82f6;
+            --accent-blue: #60a5fa;
+            --gradient-blue: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            --gradient-light: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            --shadow-blue: rgba(37, 99, 235, 0.2);
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', 'Tajawal', Arial, sans-serif;
+            background: var(--gradient-light);
+            color: var(--text-dark);
+            min-height: 100vh;
+            line-height: 1.8;
+            direction: rtl;
+            text-align: right;
+        }
+
+        /* Arabic Typography */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Cairo', 'Tajawal', Arial, sans-serif;
+            font-weight: 600;
+        }
+
+        .arabic-text {
+            font-family: 'Tajawal', 'Cairo', Arial, sans-serif;
+            line-height: 2;
+        }
+
+        /* Header Styles */
+           :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --bg-light: #f8fafc;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', Arial, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            min-height: 100vh;
+            line-height: 1.6;
+            direction: rtl;
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Simple Navigation */
+        .navbar {
+            background: var(--primary-color) !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: white !important;
+            display: flex;
+            align-items: center;
+        }
+        
+        .club-logo {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-nav .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+
+        /* RTL Specific Adjustments */
+        .me-2 {
+            margin-left: 0.5rem !important;
+            margin-right: 0 !important;
+        }
+
+        .ms-auto {
+            margin-right: auto !important;
+            margin-left: 0 !important;
+        }
+
+        /* Main Content */
+        .main-content {
+            min-height: calc(100vh - 120px);
+            padding: 2rem 0;
+        }
+
+        /* Card Styles */
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(37, 99, 235, 0.1);
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(37, 99, 235, 0.15);
+        }
+
+        .card-header {
+            background: var(--gradient-blue) !important;
+            color: white;
+            border: none;
+            padding: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .card-body {
+            padding: 2rem;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        /* Button Styles */
+        .btn-primary {
+            background: var(--gradient-blue);
+            border: none;
+            border-radius: 25px;
+            padding: 0.75rem 2rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px var(--shadow-blue);
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--shadow-blue);
+            background: var(--secondary-blue);
+        }
+
+        .btn-outline-primary {
+            border: 2px solid var(--primary-blue);
+            color: var(--primary-blue);
+            border-radius: 25px;
+            padding: 0.75rem 2rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--gradient-blue);
+            border-color: var(--primary-blue);
+            transform: translateY(-2px);
+        }
+
+        /* Form Styles */
+        .form-control {
+            border-radius: 15px;
+            border: 2px solid #e2e8f0;
+            padding: 0.75rem 1.25rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+            font-family: 'Tajawal', sans-serif;
+            text-align: right;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 0.25rem var(--shadow-blue);
+            background: white;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .input-group-text {
+            border-radius: 15px 0 0 15px;
+            border: 2px solid #e2e8f0;
+            background: var(--primary-blue);
+            color: white;
+            font-weight: 600;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        /* Alert Styles */
+        .alert {
+            border: none;
+            border-radius: 15px;
+            padding: 1rem 1.5rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            color: #166534;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+            color: #dc2626;
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            color: var(--primary-blue);
+        }
+
+        /* Animation Classes */
+        .fade-in {
+            animation: fadeIn 0.8s ease-in;
+        }
+
+        .slide-up {
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--gradient-blue);
+            color: white;
+            text-align: center;
+            padding: 1.5rem 0;
+            margin-top: auto;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .card-body {
+                padding: 1.5rem;
+            }
+            
+            .btn-primary, .btn-outline-primary {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+            
+            body {
+                font-size: 0.95rem;
+            }
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 0.35rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .status-active {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            color: #166534;
+        }
+
+        .status-scheduled {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #d97706;
+        }
+
+        .status-closed {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            color: #374151;
+        }
+
+        /* Arabic number inputs */
+        input[type="number"], 
+        input[type="tel"] {
+            direction: ltr;
+            text-align: left;
+        }
+
+        /* Dropdown RTL fix */
+        .dropdown-menu {
+            right: 0;
+            left: auto;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-blue);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-blue);
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'dashboard' %}">
+            <div class="club-logo">
+                <img src="{% static 'club-logo.png' %}" alt="شعار النادي">
+            </div>
+            <span class="club-name">النادي الثقافي لشباب لبير</span>
+        </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    {% if user.is_authenticated %}
+                        {% if user.user_type == 'super_admin' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'admin_dashboard' %}">
+                                    <i class="fas fa-tachometer-alt ms-1"></i>
+                                    لوحة التحكم
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'create_poll' %}">
+                                    <i class="fas fa-plus ms-1"></i>
+                                    إنشاء استطلاع
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                        {% if user.is_admin %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'poll_management' %}">
+                                    <i class="fas fa-list ms-1"></i>
+                                    الاستطلاعات
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'logout' %}">
+                                <i class="fas fa-sign-out-alt ms-1"></i>
+                                تسجيل خروج
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">
+                                <i class="fas fa-sign-in-alt ms-1"></i>
+                                دخول
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'register' %}">
+                                <i class="fas fa-user-plus ms-1"></i>
+                                تسجيل
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+                
+                {% if user.is_authenticated %}
+                    <span class="navbar-text text-white">
+                        <i class="fas fa-user-circle ms-1"></i>
+                        {% if user.user_type == 'user' %}
+                            {{ user.phone_number }}
+                        {% else %}
+                            {{ user.username }}
+                        {% endif %}
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Page Content -->
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer with Club Branding -->
+    <footer class="footer">
+        <div class="container">
+            <div class="club-footer">
+                <div class="club-name">
+                    <i class="fas fa-landmark ms-2"></i>
+                    النادي الثقافي لشباب لبير
+                </div>
+                <div class="election-info">
+                    منصة التصويت الإلكتروني للانتخابات
+                </div>
+                <div class="mt-2">
+                    <small class="">
+                 Made with ❤️ by Loq - تم التطوير لخدمة أعضاء النادي        © 2025 
+                    </small>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Simple JavaScript -->
+    <script>
+        // Auto-hide alerts after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }, 5000);
+            });
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

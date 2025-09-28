@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+
+{% block title %}الرئيسية - النادي الثقافي لشباب لبير{% endblock %}
+
+{% block content %}
+<!-- Welcome Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-4">
+                <h4 class="mb-2">مرحباً بك في منصة التصويت</h4>
+                <p class="text-muted mb-0">النادي الثقافي لشباب لبير</p>
+                <small class="text-muted">رقم الهاتف: {{ user.phone_number }}</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Active Polls -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h5 class="mb-3">
+            <i class="fas fa-fire text-danger ms-2"></i>
+            الاستطلاعات النشطة
+            {% if active_polls %}
+                <span class="badge bg-danger ms-2">{{ active_polls|length }}</span>
+            {% endif %}
+        </h5>
+        
+        {% if active_polls %}
+            <div class="row">
+                {% for poll in active_polls %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <h6 class="card-title mb-3">{{ poll.title }}</h6>
+                                {% if poll.description %}
+                                    <p class="text-muted small mb-3">{{ poll.description|truncatewords:15 }}</p>
+                                {% endif %}
+                                
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <small class="text-muted">
+                                        <i class="fas fa-users ms-1"></i>
+                                        {{ poll.get_total_votes }} صوت
+                                    </small>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock ms-1"></i>
+                                        ينتهي {{ poll.end_time|timeuntil }}
+                                    </small>
+                                </div>
+                                
+                                {% if poll.id in voted_poll_ids %}
+                                    <button class="btn btn-success btn-sm w-100" disabled>
+                                        <i class="fas fa-check ms-2"></i>
+                                        تم التصويت
+                                    </button>
+                                {% else %}
+                                    <a href="{% url 'poll_detail' poll.id %}" class="btn btn-primary btn-sm w-100">
+                                        <i class="fas fa-vote-yea ms-2"></i>
+                                        صوت الآن
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">لا توجد استطلاعات نشطة حالياً</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Upcoming Polls -->
+{% if upcoming_polls %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h5 class="mb-3">
+            <i class="fas fa-calendar text-primary ms-2"></i>
+            استطلاعات قادمة
+            <span class="badge bg-primary ms-2">{{ upcoming_polls|length }}</span>
+        </h5>
+        
+        <div class="row">
+            {% for poll in upcoming_polls %}
+                <div class="col-md-6 mb-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <h6 class="card-title mb-2">{{ poll.title }}</h6>
+                            <div class="alert alert-info py-2 mb-2">
+                                <small>
+                                    <i class="fas fa-play ms-1"></i>
+                                    يبدأ: {{ poll.start_time|date:"Y/m/d - H:i" }}
+                                </small>
+                            </div>
+                            <small class="text-muted">
+                                <i class="fas fa-hourglass-start ms-1"></i>
+                                يبدأ {{ poll.start_time|timeuntil }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Voting History Summary -->
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-4">
+                        <h5 class="text-primary">{{ voted_poll_ids|length }}</h5>
+                        <small class="text-muted">أصواتك</small>
+                    </div>
+                    <div class="col-4">
+                        <h5 class="text-success">{{ active_polls|length }}</h5>
+                        <small class="text-muted">نشط</small>
+                    </div>
+                    <div class="col-4">
+                        <h5 class="text-warning">{{ upcoming_polls|length }}</h5>
+                        <small class="text-muted">قادم</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Simple clean styles */
+    .card {
+        transition: transform 0.2s;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .btn {
+        font-weight: 500;
+    }
+    
+    .badge {
+        font-weight: 500;
+        padding: 0.35rem 0.65rem;
+    }
+    
+    h5 {
+        font-weight: 600;
+        color: #1e293b;
+    }
+    
+    h6 {
+        font-weight: 600;
+        color: #334155;
+    }
+    
+    .alert {
+        border: none;
+    }
+    
+    .alert-info {
+        background: #eff6ff;
+        color: #1e40af;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-refresh for active polls every 2 minutes
+    setTimeout(() => {
+        location.reload();
+    }, 120000);
+    
+    // Simple countdown update
+    document.addEventListener('DOMContentLoaded', function() {
+        // Mark active page
+        const currentUrl = window.location.pathname;
+        document.querySelectorAll('.nav-link').forEach(link => {
+            if (link.getAttribute('href') === currentUrl) {
+                link.classList.add('active');
+            }
+        });
+    });
+</script>
+{% endblock %} 

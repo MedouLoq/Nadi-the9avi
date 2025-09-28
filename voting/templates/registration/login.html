@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+
+{% block title %}تسجيل الدخول - منصة التصويت{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-lg fade-in">
+            <div class="card-header text-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-sign-in-alt ms-2"></i>
+                    أهلاً بك مجدداً
+                </h4>
+                <p class="mb-0 mt-2 text-white-50">سجل دخولك إلى حسابك</p>
+            </div>
+            <div class="card-body">
+                <form method="post" id="loginForm">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="login_identifier" class="form-label">
+                            <i class="fas fa-user ms-2"></i>رقم الهاتف أو اسم المستخدم
+                        </label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="login_identifier" name="login_identifier" 
+                                   placeholder="44800028 أو admin" required
+                                   title="أدخل رقم الهاتف (8 أرقام) أو اسم المستخدم للمديرين">
+                            <span class="input-group-text" id="prefix-indicator">222+</span>
+                        </div>
+                        <div class="form-text" id="help-text">
+                            <i class="fas fa-info-circle ms-1"></i>
+                            <span id="input-hint">رقم الهاتف الموريتاني (8 أرقام) أو اسم المستخدم للمديرين</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="password" class="form-label">
+                            <i class="fas fa-lock ms-2"></i>كلمة المرور
+                        </label>
+                        <div class="input-group">
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="fas fa-eye" id="eyeIcon"></i>
+                            </button>
+                            <input type="password" class="form-control" id="password" name="password" 
+                                   placeholder="أدخل كلمة المرور" required>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-sign-in-alt ms-2"></i>
+                            تسجيل الدخول
+                        </button>
+                    </div>
+                </form>
+                
+                <hr class="my-4">
+                
+                <div class="text-center">
+                    <p class="mb-2">ليس لديك حساب؟</p>
+                    <a href="{% url 'register' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-user-plus ms-2"></i>
+                        إنشاء حساب (للمستخدمين)
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Features Section -->
+        <div class="row mt-4">
+            <div class="col-4 text-center">
+                <div class="feature-icon mb-2">
+                    <i class="fas fa-shield-alt fa-2x text-primary"></i>
+                </div>
+                <small class="text-muted">آمن</small>
+            </div>
+            <div class="col-4 text-center">
+                <div class="feature-icon mb-2">
+                    <i class="fas fa-mobile-alt fa-2x text-primary"></i>
+                </div>
+                <small class="text-muted">مُؤكد بـ OTP</small>
+            </div>
+            <div class="col-4 text-center">
+                <div class="feature-icon mb-2">
+                    <i class="fas fa-vote-yea fa-2x text-primary"></i>
+                </div>
+                <small class="text-muted">ديمقراطي</small>
+            </div>
+        </div>
+        
+        <!-- Admin Notice -->
+        <div class="card mt-4 border-0" style="background: rgba(255, 255, 255, 0.7);">
+            <div class="card-body text-center">
+                <h6 class="card-title text-info">
+                    <i class="fas fa-info-circle ms-2"></i>
+                    للمديرين
+                </h6>
+                <p class="card-text small text-muted mb-0">
+                    المديرون يسجلون الدخول باستخدام اسم المستخدم. 
+                    المستخدمون العاديون يسجلون الدخول برقم الهاتف.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Toggle password visibility
+    document.getElementById('togglePassword').addEventListener('click', function() {
+        const passwordInput = document.getElementById('password');
+        const eyeIcon = document.getElementById('eyeIcon');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            eyeIcon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            eyeIcon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    });
+
+    // Smart input detection and validation
+    document.getElementById('login_identifier').addEventListener('input', function(e) {
+        let value = e.target.value.trim();
+        const prefixIndicator = document.getElementById('prefix-indicator');
+        const helpText = document.getElementById('input-hint');
+        
+        // Check if it looks like a phone number (digits only, 8 chars or less)
+        if (/^\d+$/.test(value) && value.length <= 8) {
+            // It's a phone number
+            prefixIndicator.style.display = 'block';
+            prefixIndicator.textContent = '222+';
+            helpText.textContent = 'رقم الهاتف الموريتاني (8 أرقام)';
+            
+            // Limit to 8 digits
+            if (value.length > 8) {
+                value = value.substring(0, 8);
+                e.target.value = value;
+            }
+            
+            // Validate phone number format
+            if (value.length === 8 && ['2', '3', '4'].includes(value[0])) {
+                e.target.classList.remove('is-invalid');
+                e.target.classList.add('is-valid');
+            } else {
+                e.target.classList.remove('is-valid');
+                if (value.length > 0) {
+                    e.target.classList.add('is-invalid');
+                }
+            }
+        } else {
+            // It's a username
+            prefixIndicator.style.display = 'none';
+            helpText.textContent = 'اسم المستخدم للمديرين';
+            
+            // Remove phone validation classes
+            e.target.classList.remove('is-valid', 'is-invalid');
+            
+            // Basic username validation
+            if (value.length >= 3) {
+                e.target.classList.add('is-valid');
+            } else if (value.length > 0) {
+                e.target.classList.add('is-invalid');
+            }
+        }
+    });
+
+    // Form submission validation
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        const loginInput = document.getElementById('login_identifier');
+        const value = loginInput.value.trim();
+        
+        // Validate based on input type
+        if (/^\d+$/.test(value)) {
+            // Phone number validation
+            if (value.length !== 8 || !['2', '3', '4'].includes(value[0])) {
+                e.preventDefault();
+                loginInput.classList.add('is-invalid');
+                loginInput.focus();
+                
+                let errorDiv = document.querySelector('.login-error');
+                if (!errorDiv) {
+                    errorDiv = document.createElement('div');
+                    errorDiv.className = 'invalid-feedback login-error';
+                    errorDiv.textContent = 'يرجى إدخال رقم هاتف موريتاني صحيح (8 أرقام تبدأ بـ 2 أو 3 أو 4)';
+                    loginInput.parentNode.appendChild(errorDiv);
+                }
+                return false;
+            }
+        } else {
+            // Username validation
+            if (value.length < 3) {
+                e.preventDefault();
+                loginInput.classList.add('is-invalid');
+                loginInput.focus();
+                
+                let errorDiv = document.querySelector('.login-error');
+                if (!errorDiv) {
+                    errorDiv = document.createElement('div');
+                    errorDiv.className = 'invalid-feedback login-error';
+                    errorDiv.textContent = 'اسم المستخدم يجب أن يكون 3 أحرف على الأقل';
+                    loginInput.parentNode.appendChild(errorDiv);
+                }
+                return false;
+            }
+        }
+    });
+</script>
+{% endblock %}

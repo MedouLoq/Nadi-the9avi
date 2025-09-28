@@ -1,0 +1,1050 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ poll.title }} - منصة التصويت{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="row justify-content-center">
+        <div class="col-xl-8 col-lg-10">
+            
+            <!-- Poll Header Card -->
+            <div class="poll-header-card mb-4">
+                <div class="card shadow-lg border-0 overflow-hidden">
+                    <div class="poll-header-bg">
+                        <div class="card-body p-4">
+                            <div class="row align-items-center">
+                                <div class="col-lg-8">
+                                    <div class="poll-title-section">
+                                        <h2 class="poll-title mb-3">{{ poll.title }}</h2>
+                                        <p class="poll-description mb-0">
+                                            {% if poll.description %}
+                                                {{ poll.description }}
+                                            {% else %}
+                                                اختر الخيار المناسب لك
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 text-end">
+                                    <div class="poll-status-section">
+                                        {% if poll.is_active %}
+                                            <span class="status-badge status-active">
+                                                <i class="fas fa-circle pulse"></i>
+                                                نشط الآن
+                                            </span>
+                                        {% elif poll.is_upcoming %}
+                                            <span class="status-badge status-scheduled">
+                                                <i class="fas fa-clock"></i>
+                                                مجدول
+                                            </span>
+                                        {% else %}
+                                            <span class="status-badge status-closed">
+                                                <i class="fas fa-lock"></i>
+                                                مغلق
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Poll Statistics Card -->
+            <div class="poll-stats-card mb-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4">
+                        <div class="row g-4">
+                            <div class="col-md-3 col-6">
+                                <div class="stat-item">
+                                    <div class="stat-icon bg-primary">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <h4 class="stat-number">{{ poll.get_total_votes }}</h4>
+                                        <p class="stat-label">صوت</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3 col-6">
+                                <div class="stat-item">
+                                    <div class="stat-icon bg-warning">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <div class="stat-text">
+                                            {% if poll.is_active %}
+                                                ينتهي {{ poll.end_time|timeuntil }}
+                                            {% elif poll.is_upcoming %}
+                                                يبدأ {{ poll.start_time|timeuntil }}
+                                            {% else %}
+                                                انتهى {{ poll.end_time|timesince }}
+                                            {% endif %}
+                                        </div>
+                                        <p class="stat-label">التوقيت</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3 col-6">
+                                <div class="stat-item">
+                                    <div class="stat-icon bg-info">
+                                        <i class="fas fa-calendar"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <div class="stat-text">{{ poll.created_at|date:"Y/m/d" }}</div>
+                                        <p class="stat-label">تاريخ الإنشاء</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3 col-6">
+                                <div class="stat-item">
+                                    <div class="stat-icon bg-success">
+                                        <i class="fas fa-list-ol"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <h4 class="stat-number">{{ poll.options.count }}</h4>
+                                        <p class="stat-label">خيار</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Admin Results Button -->
+                        {% if can_view_results %}
+                            <div class="text-center mt-4">
+                                <a href="{% url 'poll_results' poll.id %}" class="btn btn-outline-primary btn-lg">
+                                    <i class="fas fa-chart-bar me-2"></i>
+                                    عرض النتائج التفصيلية
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            {% if can_vote %}
+                <!-- Active Voting Section -->
+                <div class="voting-section">
+                    <div class="card shadow-lg border-0">
+                        <div class="card-header voting-header">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <div class="voting-icon me-3">
+                                    <i class="fas fa-vote-yea fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h4 class="mb-1">صوّت الآن</h4>
+                                    <p class="mb-0 opacity-75">اختر الخيار الذي يعبر عن رأيك</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body p-4">
+                            <form method="post" id="votingForm">
+                                {% csrf_token %}
+                                
+                                <div class="voting-options mb-4">
+                                    {% for option in poll.options.all %}
+                                        <div class="option-wrapper mb-3" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:100 }}">
+                                            <input type="radio" class="btn-check" name="option_id" 
+                                                   id="option_{{ option.id }}" value="{{ option.id }}" required>
+                                            <label class="option-card" for="option_{{ option.id }}">
+                                                <div class="option-content">
+                                                    <div class="option-number">
+                                                        <span>{{ forloop.counter }}</span>
+                                                    </div>
+                                                    <div class="option-text-wrapper">
+                                                        <div class="option-text">{{ option.option_text }}</div>
+                                                    </div>
+                                                    <div class="option-radio">
+                                                        <div class="radio-circle">
+                                                            <i class="fas fa-check"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                
+                                <div class="voting-actions">
+                                    <button type="submit" class="btn btn-primary btn-lg w-100 vote-btn">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        <span>تأكيد التصويت</span>
+                                        <div class="btn-ripple"></div>
+                                    </button>
+                                    
+                                    <div class="voting-notice mt-3">
+                                        <div class="notice-content">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            <span>لا يمكن تغيير اختيارك بعد التصويت</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+            {% else %}
+                <!-- Post-Vote or Closed Poll Section -->
+                <div class="poll-status-section">
+                    <div class="card shadow-lg border-0">
+                        <div class="card-body text-center py-5">
+                            
+                            {% if user_vote %}
+                                <!-- Already Voted -->
+                                <div class="voted-status">
+                                    <div class="success-icon mb-4">
+                                        <div class="checkmark-wrapper">
+                                            <i class="fas fa-check-circle fa-5x text-success"></i>
+                                            <div class="success-ripple"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <h3 class="status-title mb-3">تم تسجيل صوتك بنجاح!</h3>
+                                    
+                                    <div class="vote-details mb-4">
+                                        <div class="selected-option">
+                                            <span class="label">اختيارك:</span>
+                                            <span class="value">{{ user_vote.option.option_text }}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    {% if can_view_results %}
+                                        <a href="{% url 'poll_results' poll.id %}" class="btn btn-outline-primary btn-lg">
+                                            <i class="fas fa-chart-bar me-2"></i>
+                                            عرض النتائج التفصيلية
+                                        </a>
+                                    {% else %}
+                                        <div class="info-message">
+                                            <i class="fas fa-lock me-2"></i>
+                                            النتائج متاحة للمسؤولين فقط
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                            {% elif not poll.is_active %}
+                                <!-- Poll Closed/Upcoming -->
+                                <div class="poll-closed">
+                                    <div class="status-icon mb-4">
+                                        {% if poll.is_upcoming %}
+                                            <i class="fas fa-clock fa-5x text-warning"></i>
+                                        {% else %}
+                                            <i class="fas fa-lock fa-5x text-secondary"></i>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <h3 class="status-title mb-3">
+                                        {% if poll.is_upcoming %}
+                                            الاستطلاع لم يبدأ بعد
+                                        {% else %}
+                                            انتهى الاستطلاع
+                                        {% endif %}
+                                    </h3>
+                                    
+                                    <div class="status-details mb-4">
+                                        {% if poll.is_upcoming %}
+                                            <p class="status-text">سيبدأ في {{ poll.start_time|date:"Y/m/d H:i" }}</p>
+                                        {% else %}
+                                            <p class="status-text">انتهى في {{ poll.end_time|date:"Y/m/d H:i" }}</p>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    {% if not poll.is_upcoming and can_view_results %}
+                                        <a href="{% url 'poll_results' poll.id %}" class="btn btn-outline-primary btn-lg">
+                                            <i class="fas fa-chart-bar me-2"></i>
+                                            عرض النتائج
+                                        </a>
+                                    {% elif not can_view_results and not poll.is_upcoming %}
+                                        <div class="info-message">
+                                            <i class="fas fa-lock me-2"></i>
+                                            النتائج متاحة للمسؤولين فقط
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Options Preview (for non-voting states) -->
+            {% if not can_vote and not user_vote %}
+                <div class="options-preview-section mt-4">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0 d-flex align-items-center">
+                                <i class="fas fa-list me-2 text-primary"></i>
+                                خيارات التصويت
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                {% for option in poll.options.all %}
+                                    <div class="col-lg-6">
+                                        <div class="preview-option">
+                                            <div class="preview-number">{{ forloop.counter }}</div>
+                                            <div class="preview-text">{{ option.option_text }}</div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Navigation -->
+            <div class="navigation-section text-center mt-5">
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary btn-lg">
+                    <i class="fas fa-arrow-right me-2"></i>
+                    العودة للرئيسية
+                </a>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary-blue: #2563eb;
+        --gradient-blue: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        --success-green: #10b981;
+        --warning-yellow: #f59e0b;
+        --info-cyan: #06b6d4;
+        --secondary-gray: #6b7280;
+    }
+
+    /* Poll Header Styling */
+    .poll-header-card .card {
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .poll-header-bg {
+        background: var(--gradient-blue);
+        color: white;
+        position: relative;
+    }
+
+    .poll-header-bg::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+    }
+
+    .poll-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .poll-description {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        line-height: 1.6;
+    }
+
+    /* Status Badge Styling */
+    .status-badge {
+        padding: 8px 16px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .status-active {
+        background: rgba(16, 185, 129, 0.2);
+        color: #10b981;
+        border: 2px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-scheduled {
+        background: rgba(245, 158, 11, 0.2);
+        color: #f59e0b;
+        border: 2px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .status-closed {
+        background: rgba(107, 114, 128, 0.2);
+        color: #6b7280;
+        border: 2px solid rgba(107, 114, 128, 0.3);
+    }
+
+    .pulse {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    /* Statistics Card Styling */
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 20px;
+        background: #f8fafc;
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .stat-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+    }
+
+    .stat-content .stat-number {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0;
+        color: #1f2937;
+    }
+
+    .stat-content .stat-text {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0;
+        color: #1f2937;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    /* Voting Section Styling */
+    .voting-section .card {
+        border-radius: 20px;
+    }
+
+    .voting-header {
+        background: var(--gradient-blue);
+        color: white;
+        border-radius: 20px 20px 0 0 !important;
+        padding: 25px;
+    }
+
+    .voting-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Option Cards Styling */
+    .option-wrapper {
+        transition: all 0.3s ease;
+    }
+
+    .option-card {
+        display: block;
+        width: 100%;
+        padding: 0;
+        border: 2px solid #e5e7eb;
+        border-radius: 15px;
+        background: #ffffff;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .option-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border-color: var(--primary-blue);
+    }
+
+    .option-content {
+        display: flex;
+        align-items: center;
+        padding: 20px;
+        gap: 20px;
+    }
+
+    .option-number {
+        width: 45px;
+        height: 45px;
+        background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+        color: #374151;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .option-text-wrapper {
+        flex: 1;
+    }
+
+    .option-text {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1f2937;
+        line-height: 1.5;
+    }
+
+    .option-radio {
+        flex-shrink: 0;
+    }
+
+    .radio-circle {
+        width: 30px;
+        height: 30px;
+        border: 3px solid #d1d5db;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .radio-circle i {
+        opacity: 0;
+        transform: scale(0);
+        transition: all 0.3s ease;
+        color: white;
+        font-size: 0.9rem;
+    }
+
+    /* Selected Option Styling */
+    .btn-check:checked + .option-card {
+        background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+        border-color: var(--primary-blue);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(37, 99, 235, 0.2);
+    }
+
+    .btn-check:checked + .option-card .option-number {
+        background: var(--gradient-blue);
+        color: white;
+    }
+
+    .btn-check:checked + .option-card .radio-circle {
+        background: var(--primary-blue);
+        border-color: var(--primary-blue);
+    }
+
+    .btn-check:checked + .option-card .radio-circle i {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    /* Vote Button Styling */
+    .vote-btn {
+        background: var(--gradient-blue);
+        border: none;
+        border-radius: 15px;
+        padding: 15px 30px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .vote-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-ripple {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.3);
+        transition: all 0.6s ease;
+    }
+
+    .vote-btn:active .btn-ripple {
+        width: 300px;
+        height: 300px;
+    }
+
+    /* Voting Notice */
+    .voting-notice {
+        text-align: center;
+    }
+
+    .notice-content {
+        display: inline-flex;
+        align-items: center;
+        padding: 10px 20px;
+        background: rgba(245, 158, 11, 0.1);
+        color: #92400e;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    /* Status Sections */
+    .voted-status, .poll-closed {
+        padding: 40px 20px;
+    }
+
+    .success-icon {
+        position: relative;
+        display: inline-block;
+    }
+
+    .checkmark-wrapper {
+        position: relative;
+    }
+
+    .success-ripple {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 120px;
+        height: 120px;
+        border: 3px solid #10b981;
+        border-radius: 50%;
+        opacity: 0.3;
+        animation: ripple 2s infinite;
+    }
+
+    @keyframes ripple {
+        0% {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 0.3;
+        }
+        100% {
+            transform: translate(-50%, -50%) scale(1.5);
+            opacity: 0;
+        }
+    }
+
+    .status-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .vote-details {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 12px;
+        padding: 20px;
+        margin: 20px auto;
+        max-width: 400px;
+    }
+
+    .selected-option {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+    }
+
+    .selected-option .label {
+        font-size: 0.9rem;
+        color: #6b7280;
+        font-weight: 500;
+    }
+
+    .selected-option .value {
+        font-size: 1.2rem;
+        color: #065f46;
+        font-weight: 700;
+    }
+
+    .info-message {
+        display: inline-flex;
+        align-items: center;
+        padding: 12px 24px;
+        background: rgba(59, 130, 246, 0.1);
+        color: #1e40af;
+        border-radius: 25px;
+        font-weight: 500;
+    }
+
+    /* Options Preview */
+    .preview-option {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px;
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .preview-option:hover {
+        background: #f1f5f9;
+        transform: translateY(-1px);
+    }
+
+    .preview-number {
+        width: 35px;
+        height: 35px;
+        background: var(--gradient-blue);
+        color: white;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .preview-text {
+        font-weight: 500;
+        color: #374151;
+        flex: 1;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .poll-title {
+            font-size: 1.8rem;
+        }
+        
+        .poll-description {
+            font-size: 1rem;
+        }
+        
+        .stat-item {
+            flex-direction: column;
+            text-align: center;
+            gap: 10px;
+        }
+        
+        .option-content {
+            flex-direction: column;
+            text-align: center;
+            gap: 15px;
+        }
+        
+        .option-content {
+            padding: 20px 15px;
+        }
+        
+        .voted-status, .poll-closed {
+            padding: 30px 15px;
+        }
+        
+        .vote-details {
+            margin: 15px;
+        }
+    }
+
+    /* Animation Utilities */
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Enhanced voting form submission with better UX
+    document.getElementById('votingForm')?.addEventListener('submit', function(e) {
+        const selectedOption = document.querySelector('input[name="option_id"]:checked');
+        const submitBtn = this.querySelector('.vote-btn');
+        
+        if (!selectedOption) {
+            e.preventDefault();
+            
+            // Show error animation
+            const firstOption = document.querySelector('.option-card');
+            if (firstOption) {
+                firstOption.style.animation = 'shake 0.5s ease-in-out';
+                setTimeout(() => {
+                    firstOption.style.animation = '';
+                }, 500);
+            }
+            
+            alert('يرجى اختيار أحد الخيارات');
+            return false;
+        }
+        
+        const optionText = selectedOption.nextElementSibling.querySelector('.option-text').textContent;
+        
+        if (!confirm(`هل أنت متأكد من اختيارك: "${optionText}"؟\n\nلا يمكن تغيير اختيارك بعد التصويت.`)) {
+            e.preventDefault();
+            return false;
+        }
+        
+        // Add loading state to button
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `
+            <i class="fas fa-spinner fa-spin me-2"></i>
+            جاري التصويت...
+        `;
+    });
+
+    // Enhanced option selection with better visual feedback
+    document.querySelectorAll('input[name="option_id"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            // Remove selection from all options
+            document.querySelectorAll('.option-wrapper').forEach(wrapper => {
+                wrapper.classList.remove('option-selected');
+                const card = wrapper.querySelector('.option-card');
+                card.style.transform = '';
+            });
+            
+            // Add selection to chosen option
+            if (this.checked) {
+                const wrapper = this.closest('.option-wrapper');
+                wrapper.classList.add('option-selected');
+                
+                // Add a subtle bounce effect
+                const card = wrapper.querySelector('.option-card');
+                card.style.transform = 'translateY(-3px) scale(1.02)';
+                setTimeout(() => {
+                    card.style.transform = 'translateY(-3px)';
+                }, 200);
+            }
+        });
+    });
+
+    // Auto-refresh functionality for upcoming/ending polls
+    {% if poll.is_upcoming %}
+        const pollStartTime = new Date('{{ poll.start_time|date:"c" }}');
+        const now = new Date();
+        const timeUntilStart = pollStartTime - now;
+        
+        if (timeUntilStart > 0 && timeUntilStart < 3600000) { // Less than 1 hour
+            setTimeout(() => {
+                location.reload();
+            }, timeUntilStart + 1000); // Refresh 1 second after start time
+        }
+    {% endif %}
+
+    // Auto-refresh for active polls nearing end
+    {% if poll.is_active %}
+        const pollEndTime = new Date('{{ poll.end_time|date:"c" }}');
+        const now = new Date();
+        const timeUntilEnd = pollEndTime - now;
+        
+        if (timeUntilEnd > 0 && timeUntilEnd < 300000) { // Less than 5 minutes
+            setTimeout(() => {
+                location.reload();
+            }, timeUntilEnd + 1000); // Refresh 1 second after end time
+        }
+    {% endif %}
+
+    // Enhanced entrance animations with staggered effect
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate header
+        setTimeout(() => {
+            document.querySelector('.poll-header-card')?.classList.add('fade-in');
+        }, 100);
+        
+        // Animate stats
+        setTimeout(() => {
+            document.querySelector('.poll-stats-card')?.classList.add('fade-in');
+        }, 200);
+        
+        // Animate main content
+        setTimeout(() => {
+            const mainContent = document.querySelector('.voting-section, .poll-status-section');
+            mainContent?.classList.add('fade-in');
+        }, 300);
+        
+        // Animate options with stagger
+        const optionCards = document.querySelectorAll('.option-wrapper');
+        optionCards.forEach((card, index) => {
+            setTimeout(() => {
+                card.classList.add('fade-in');
+            }, 400 + (index * 100));
+        });
+        
+        // Animate preview options
+        setTimeout(() => {
+            document.querySelector('.options-preview-section')?.classList.add('fade-in');
+        }, 400);
+    });
+
+    // Add hover effects for better interactivity
+    document.querySelectorAll('.stat-item').forEach(item => {
+        item.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px) scale(1.02)';
+        });
+        
+        item.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+
+    // Enhanced ripple effect for buttons
+    document.querySelectorAll('.btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size}px;
+                left: ${x}px;
+                top: ${y}px;
+                background: rgba(255, 255, 255, 0.3);
+                border-radius: 50%;
+                transform: scale(0);
+                animation: ripple-effect 0.6s linear;
+                pointer-events: none;
+            `;
+            
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+
+    // Add CSS for ripple animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple-effect {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        .btn {
+            position: relative;
+            overflow: hidden;
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Keyboard navigation support
+    document.addEventListener('keydown', function(e) {
+        const options = document.querySelectorAll('input[name="option_id"]');
+        const currentSelected = document.querySelector('input[name="option_id"]:checked');
+        
+        if (options.length === 0) return;
+        
+        let currentIndex = currentSelected ? 
+            Array.from(options).indexOf(currentSelected) : -1;
+        
+        if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+            e.preventDefault();
+            currentIndex = (currentIndex + 1) % options.length;
+            options[currentIndex].checked = true;
+            options[currentIndex].dispatchEvent(new Event('change'));
+            options[currentIndex].focus();
+        } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+            e.preventDefault();
+            currentIndex = currentIndex <= 0 ? options.length - 1 : currentIndex - 1;
+            options[currentIndex].checked = true;
+            options[currentIndex].dispatchEvent(new Event('change'));
+            options[currentIndex].focus();
+        } else if (e.key === 'Enter' && currentSelected) {
+            e.preventDefault();
+            document.getElementById('votingForm')?.submit();
+        }
+    });
+
+    // Add smooth scrolling to results button
+    document.querySelectorAll('a[href*="poll_results"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            // Add loading state
+            const icon = this.querySelector('i');
+            const originalClass = icon.className;
+            icon.className = 'fas fa-spinner fa-spin me-2';
+            
+            setTimeout(() => {
+                icon.className = originalClass;
+            }, 1000);
+        });
+    });
+
+    // Progressive enhancement for better performance
+    if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-in');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.stat-item, .option-wrapper, .preview-option').forEach(el => {
+            observer.observe(el);
+        });
+    }
+</script>
+
+<!-- Add Arabic number filter for better localization -->
+<script>
+    // Arabic number conversion
+    document.addEventListener('DOMContentLoaded', function() {
+        const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        
+        document.querySelectorAll('.option-number span, .preview-number').forEach(el => {
+            const number = el.textContent || el.innerText;
+            if (/^\d+$/.test(number)) {
+                el.textContent = number.split('').map(digit => arabicNumbers[parseInt(digit)] || digit).join('');
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+
+{% block title %}تسجيل - منصة التصويت{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center" dir="rtl">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-lg fade-in">
+            <div class="card-header text-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-user-plus me-2"></i>
+                    إنشاء حساب
+                </h4>
+                <p class="mb-0 mt-2 text-white-50">انضم إلى منصتنا الآمنة للتصويت</p>
+            </div>
+            <div class="card-body">
+                <!-- خطوات التسجيل -->
+                <div class="registration-steps mb-4">
+                    <div class="step active">
+                        <div class="step-number">1</div>
+                        <div class="step-text">رقم الهاتف</div>
+                    </div>
+                    <div class="step-line"></div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-text">تأكيد رمز OTP</div>
+                    </div>
+                </div>
+                
+                <form method="post" id="registerForm">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="phone_number" class="form-label">
+                            <i class="fas fa-phone me-2"></i>رقم الهاتف
+                        </label>
+                        <div class="input-group">
+    <input type="tel" class="form-control" id="phone_number" name="phone_number" 
+           placeholder="44800028" required
+           pattern="^[234]\d{7}$"
+           maxlength="8"
+           title="أدخل 8 أرقام تبدأ بـ 2 أو 3 أو 4">
+    <span class="input-group-text bg-primary text-white">+222</span>
+</div>
+
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            أدخل رقم هاتفك الموريتاني (8 أرقام تبدأ بـ 2 أو 3 أو 4)
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 mb-3">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-paper-plane me-2"></i>
+                            إرسال رمز OTP
+                        </button>
+                    </div>
+                </form>
+                
+                <hr class="my-4">
+                
+                <div class="text-center">
+                    <p class="mb-2">هل لديك حساب بالفعل؟</p>
+                    <a href="{% url 'login' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-sign-in-alt me-2"></i>
+                        تسجيل الدخول
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- إشعار الأمان -->
+        <div class="card mt-4 border-0" style="background: rgba(255, 255, 255, 0.7);">
+            <div class="card-body text-center">
+                <h6 class="card-title text-primary">
+                    <i class="fas fa-shield-alt me-2"></i>
+                    خصوصيتك وأمانك
+                </h6>
+                <p class="card-text small text-muted mb-0">
+                    رقم هاتفك مُشفر ويُستخدم فقط للمصادقة. 
+                    لن نشارك معلوماتك مع أي طرف ثالث.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .registration-steps {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 2rem;
+    }
+
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+    }
+
+    .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .step.active .step-number {
+        background: var(--gradient-blue);
+        color: white;
+        box-shadow: 0 4px 15px var(--shadow-blue);
+    }
+
+    .step-text {
+        font-size: 0.8rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .step.active .step-text {
+        color: var(--primary-blue);
+        font-weight: 600;
+    }
+
+    .step-line {
+        height: 2px;
+        background: #e2e8f0;
+        flex: 1;
+        margin: 0 1rem;
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // التحقق من صحة رقم الهاتف
+    document.getElementById('phone_number').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        
+        if (value.length > 8) {
+            value = value.substring(0, 8);
+        }
+        
+        e.target.value = value;
+        
+        if (value.length === 8 && ['2', '3', '4'].includes(value[0])) {
+            e.target.classList.remove('is-invalid');
+            e.target.classList.add('is-valid');
+        } else {
+            e.target.classList.remove('is-valid');
+            if (value.length > 0) {
+                e.target.classList.add('is-invalid');
+            }
+        }
+    });
+
+    // التحقق عند إرسال النموذج
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        const phoneInput = document.getElementById('phone_number');
+        const phoneValue = phoneInput.value;
+        
+        if (phoneValue.length !== 8 || !['2', '3', '4'].includes(phoneValue[0])) {
+            e.preventDefault();
+            phoneInput.classList.add('is-invalid');
+            phoneInput.focus();
+            
+            let errorDiv = document.querySelector('.phone-error');
+            if (!errorDiv) {
+                errorDiv = document.createElement('div');
+                errorDiv.className = 'invalid-feedback phone-error';
+                errorDiv.textContent = 'الرجاء إدخال رقم هاتف موريتاني صحيح من 8 أرقام يبدأ بـ 2 أو 3 أو 4';
+                phoneInput.parentNode.appendChild(errorDiv);
+            }
+            return false;
+        }
+    });
+</script>
+{% endblock %}

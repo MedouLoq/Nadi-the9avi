@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% block title %}لوحة التحكم - النادي الثقافي لشباب لبير{% endblock %}
+
+{% block content %}
+<!-- Simple Admin Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-4">
+                <h3 class="mb-2">لوحة تحكم المدير العام</h3>
+                <p class="text-muted mb-0">إدارة انتخابات النادي الثقافي لشباب لبير</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Statistics -->
+<div class="row mb-4">
+    <div class="col-md-3 col-6 mb-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                <h4>{{ total_users }}</h4>
+                <small class="text-muted">المصوتون</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 col-6 mb-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-poll fa-2x text-success mb-2"></i>
+                <h4>{{ total_polls }}</h4>
+                <small class="text-muted">الاستطلاعات</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 col-6 mb-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-fire fa-2x text-warning mb-2"></i>
+                <h4>{{ active_polls }}</h4>
+                <small class="text-muted">نشط الآن</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 col-6 mb-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-check-circle fa-2x text-info mb-2"></i>
+                <h4>{{ total_votes }}</h4>
+                <small class="text-muted">الأصوات</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="mb-3">الإجراءات السريعة</h5>
+                <div class="row">
+                    <div class="col-md-4 mb-2">
+                        <a href="{% url 'create_poll' %}" class="btn btn-primary w-100">
+                            <i class="fas fa-plus ms-2"></i>
+                            إنشاء استطلاع جديد
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <a href="{% url 'poll_management' %}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-list ms-2"></i>
+                            إدارة الاستطلاعات
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <button class="btn btn-outline-success w-100" onclick="window.print()">
+                            <i class="fas fa-print ms-2"></i>
+                            طباعة التقرير
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Polls Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">الاستطلاعات الأخيرة</h5>
+                    <a href="{% url 'poll_management' %}" class="btn btn-sm btn-link">عرض الكل ←</a>
+                </div>
+                
+                {% if recent_polls %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>العنوان</th>
+                                    <th>الحالة</th>
+                                    <th>الأصوات</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for poll in recent_polls|slice:":5" %}
+                                    <tr>
+                                        <td>{{ poll.title }}</td>
+                                        <td>
+                                            {% if poll.is_active %}
+                                                <span class="badge bg-success">نشط</span>
+                                            {% elif poll.is_upcoming %}
+                                                <span class="badge bg-warning">مجدول</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">منتهي</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ poll.get_total_votes }}</td>
+                                        <td>
+                                            <a href="{% url 'poll_results' poll.id %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-chart-bar"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <p class="text-muted">لا توجد استطلاعات بعد</p>
+                        <a href="{% url 'create_poll' %}" class="btn btn-primary">
+                            <i class="fas fa-plus ms-2"></i>
+                            إنشاء أول استطلاع
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Simple clean styles */
+    .card {
+        border-radius: 10px !important;
+    }
+    
+    .btn {
+        border-radius: 5px;
+        font-weight: 500;
+    }
+    
+    .table th {
+        border-top: none;
+        font-weight: 600;
+    }
+    
+    .badge {
+        padding: 0.5rem 0.75rem;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function viewPollResults(pollId) {
+        window.location.href = `/poll/${pollId}/results/`;
+    }
+</script>
+{% endblock %}

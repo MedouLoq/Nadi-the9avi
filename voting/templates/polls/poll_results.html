@@ -1,0 +1,1164 @@
+{% extends 'base.html' %}
+{% load l10n %}
+
+{% block title %}نتائج الاستطلاع - {{ poll.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Use the base theme's background */
+    body {
+        background: var(--gradient-light);
+    }
+    
+    .results-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        box-shadow: 0 10px 40px var(--shadow-blue);
+        overflow: hidden;
+        margin: 20px 0;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .poll-header {
+        background: var(--gradient-blue);
+        color: white;
+        padding: 40px 30px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .poll-header::before {
+        content: '';
+        position: absolute;
+        top: -50%; right: -50%;
+        width: 200%; height: 200%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><defs><pattern id="p" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1" height="10" fill="white" opacity="0.1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23p)"/></svg>');
+        animation: float 20s infinite linear;
+    }
+    
+    @keyframes float {
+        0% { transform: translate(0, 0); }
+        100% { transform: translate(-50px, -50px); }
+    }
+    
+    .poll-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        position: relative;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    .poll-description {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        position: relative;
+        margin-bottom: 20px;
+    }
+    
+    .status-badge {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(5px);
+        padding: 8px 20px;
+        border-radius: 25px;
+        font-weight: 600;
+        display: inline-block;
+        position: relative;
+    }
+    
+    .stats-grid {
+        background: white;
+        padding: 40px 30px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .stat-card {
+        background: linear-gradient(145deg, #f8fafc, #e2e8f0);
+        border-radius: 20px;
+        padding: 25px;
+        text-align: center;
+        transition: all 0.3s ease;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        border-color: var(--primary-blue);
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 8px;
+        background: linear-gradient(45deg, #2563eb, #1d4ed8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        color: #64748b;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .chart-section, .results-list {
+        background: white;
+        padding: 40px 30px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .chart-container {
+        background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 30px;
+        border: 1px solid #e2e8f0;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    .chart-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+    
+    .chart-tab {
+        background: rgba(37, 99, 235, 0.08);
+        border: 2px solid rgba(37, 99, 235, 0.2);
+        color: #2563eb;
+        padding: 12px 24px;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-weight: 600;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .chart-tab::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transition: left 0.5s;
+    }
+    
+    .chart-tab:hover::before {
+        left: 100%;
+    }
+    
+    .chart-tab.active {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white;
+        border-color: #1e40af;
+        box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+        transform: translateY(-2px);
+    }
+    
+    .chart-tab:hover:not(.active) {
+        background: rgba(37, 99, 235, 0.12);
+        border-color: rgba(37, 99, 235, 0.3);
+        transform: translateY(-2px);
+    }
+    
+    .result-item {
+        background: linear-gradient(145deg, #ffffff, #f8fafc);
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 20px;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid #e2e8f0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .result-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(90deg, #2563eb, #3b82f6);
+        transition: left 0.8s ease;
+    }
+    
+    .result-item:hover::before {
+        left: 100%;
+    }
+    
+    .result-item:hover {
+        transform: translateY(-5px) scale(1.01);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        border-color: #3b82f6;
+    }
+    
+    .result-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .option-text {
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .winner-crown {
+        color: #f59e0b;
+        font-size: 1.3rem;
+        animation: bounce 2s infinite;
+        filter: drop-shadow(0 2px 4px rgba(245, 158, 11, 0.3));
+    }
+    
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+        40% { transform: translateY(-10px); }
+        60% { transform: translateY(-5px); }
+    }
+    
+    .vote-info {
+        background: linear-gradient(135deg, #ffffff, #f0f9ff);
+        padding: 12px 24px;
+        border-radius: 25px;
+        font-weight: 600;
+        color: #2563eb;
+        border: 2px solid rgba(37, 99, 235, 0.2);
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+    }
+    
+    .result-item {
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-container {
+            background: #e2e8f0;
+            border-radius: 15px;
+            height: 35px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .progress-bar {
+            height: 100%;
+            border-radius: 15px;
+            transition: width 2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(135deg, #3b82f6, #2563eb, #1d4ed8);
+            box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+            width: 0%; /* Start at 0 */
+        }
+        
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+    
+    @keyframes shimmer {
+        0% { left: -100%; }
+        100% { left: 100%; }
+    }
+    
+    .no-votes {
+        text-align: center;
+        padding: 80px 30px;
+        color: #64748b;
+        background: white;
+    }
+    
+    .no-votes-icon {
+        font-size: 5rem;
+        margin-bottom: 25px;
+        opacity: 0.4;
+        color: #3b82f6;
+        animation: pulse 3s infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 0.4; }
+        50% { opacity: 0.6; }
+    }
+    
+    .actions-section {
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        padding: 30px;
+        text-align: center;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .auto-refresh {
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        color: #3b82f6;
+        padding: 15px;
+        border-radius: 15px;
+        margin-top: 20px;
+    }
+    
+    .refresh-indicator {
+        display: inline-block;
+        animation: spin 2s linear infinite;
+        margin-left: 8px;
+    }
+    
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 35px;
+        color: #1e293b;
+        text-align: center;
+        position: relative;
+        padding-bottom: 20px;
+    }
+    
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        border-radius: 2px;
+    }
+    
+    /* Print Styles - Enhanced */
+    @media print {
+        body { 
+            background: white !important; 
+            font-size: 12pt;
+            line-height: 1.4;
+        }
+        
+        nav, footer, .actions-section, .auto-refresh, .chart-tabs { 
+            display: none !important; 
+        }
+        
+        .results-container { 
+            box-shadow: none !important; 
+            border: 2px solid #333;
+            margin: 0;
+            border-radius: 0;
+        }
+        
+        .poll-header { 
+            background: #2563eb !important;
+            color: white !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            page-break-inside: avoid;
+        }
+        
+        .poll-header::before {
+            display: none;
+        }
+        
+        .poll-title {
+            font-size: 24pt;
+            margin-bottom: 10pt;
+        }
+        
+        .poll-description {
+            font-size: 14pt;
+        }
+        
+        .stats-grid {
+            page-break-inside: avoid;
+            border-bottom: 2px solid #333;
+        }
+        
+        .stat-card {
+            background: #f8f9fa !important;
+            border: 1px solid #333 !important;
+            box-shadow: none !important;
+            margin-bottom: 10pt;
+        }
+        
+        .stat-number {
+            color: #2563eb !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        
+        .chart-section {
+            page-break-before: always;
+            padding: 20pt 15pt;
+        }
+        
+        .chart-container { 
+            page-break-inside: avoid;
+            background: #f8f9fa !important;
+            border: 1px solid #333 !important;
+            box-shadow: none !important;
+        }
+        
+        .results-list {
+            page-break-before: auto;
+            padding: 20pt 15pt;
+        }
+        
+   
+        
+        .result-item:hover::before {
+            display: none;
+        }
+        
+       
+        
+        .vote-info {
+            background: #f8f9fa !important;
+            border: 1px solid #333 !important;
+            color: #2563eb !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        
+        .section-title {
+            font-size: 18pt;
+            margin-bottom: 15pt;
+        }
+        
+        .section-title::after {
+            background: #2563eb !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        
+        /* Print header with logo and timestamp */
+        .print-header {
+            display: block !important;
+            text-align: center;
+            padding: 15pt;
+            border-bottom: 2px solid #333;
+            margin-bottom: 20pt;
+        }
+        
+        .print-logo {
+            max-height: 60pt;
+            margin-bottom: 10pt;
+        }
+        
+        .print-timestamp {
+            font-size: 10pt;
+            color: #666;
+            margin-top: 10pt;
+        }
+        
+        .winner-crown {
+            color: #f59e0b !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        
+        /* Ensure all critical elements print */
+        * {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+    }
+    
+    .print-header {
+        display: none;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 767px) {
+        .poll-title { font-size: 1.8rem; }
+        .results-container { margin: 10px; border-radius: 15px; }
+        .poll-header, .stats-grid, .chart-section, .results-list, .actions-section { padding: 25px 15px; }
+        .stat-number { font-size: 2rem; }
+        .result-header { flex-direction: column; align-items: flex-start; }
+        .chart-tab { min-width: 90px; padding: 10px 18px; font-size: 0.9rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Print Header (only visible when printing) -->
+<div class="print-header">
+    <img src="{{ logo_url }}" alt="Club Logo" class="print-logo">
+    <h1>تقرير نتائج الاستطلاع</h1>
+    <div class="print-timestamp">تاريخ الطباعة: <span id="printDate"></span></div>
+</div>
+
+<div class="results-container slide-up">
+    <!-- Poll Header -->
+    <div class="poll-header">
+        <h1 class="poll-title">{{ poll.title }}</h1>
+        {% if poll.description %}
+            <p class="poll-description">{{ poll.description }}</p>
+        {% endif %}
+        <div class="status-badge">
+            {% if poll.is_active %}
+                <i class="fas fa-circle text-success ms-2"></i>التصويت مفتوح
+            {% else %}
+                <i class="fas fa-circle text-secondary ms-2"></i>التصويت منتهي
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Statistics Grid -->
+    <div class="stats-grid">
+        <div class="row g-3 g-lg-4">
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalVotesCounter">0</div>
+                    <div class="stat-label">إجمالي الأصوات</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-number">{{ poll.options.count }}</div>
+                    <div class="stat-label">عدد الخيارات</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-number">
+                        {% if total_votes > 0 %}{{ options_with_results.0.vote_count }}{% else %}0{% endif %}
+                    </div>
+                    <div class="stat-label">أعلى تصويت</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-number" style="font-size: 1.6rem;">
+                        {% if poll.is_active %}
+                            <span id="timeRemaining">حساب الوقت...</span>
+                        {% else %}
+                            منتهي
+                        {% endif %}
+                    </div>
+                    <div class="stat-label">الوقت المتبقي</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if total_votes > 0 %}
+        <!-- Charts Section -->
+        <div class="chart-section">
+            <h2 class="section-title">الرسوم البيانية</h2>
+            
+            <div class="chart-tabs">
+                <div class="chart-tab active" data-chart-type="doughnut">
+                    <i class="fas fa-chart-pie ms-2"></i>دائري
+                </div>
+                <div class="chart-tab" data-chart-type="bar">
+                    <i class="fas fa-chart-bar ms-2"></i>أعمدة
+                </div>
+                <div class="chart-tab" data-chart-type="horizontalBar">
+                    <i class="fas fa-chart-bar fa-rotate-90 ms-2"></i>أفقي
+                </div>
+                <div class="chart-tab" data-chart-type="line">
+                    <i class="fas fa-chart-line ms-2"></i>خطي
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="resultsChart" style="max-height: 400px;"></canvas>
+            </div>
+        </div>
+
+        <!-- Results List -->
+        <div class="results-list">
+            <h2 class="section-title">النتائج التفصيلية</h2>
+            
+            {% for result in options_with_results %}
+                <div class="result-item">
+                    <div class="result-header">
+                        <div class="option-text">
+                            {% if forloop.first and total_votes > 0 %}
+                                <i class="fas fa-crown winner-crown"></i>
+                            {% endif %}
+                            <span>{{ result.option.option_text }}</span>
+                        </div>
+                        <div class="vote-info">
+                            <strong>{{ result.vote_count }}</strong> صوت
+                            <span class="text-muted">({{ result.percentage|floatformat:1 }}%)</span>
+                        </div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar" 
+                             style="width: 0%"
+                             data-width="{{ result.percentage }}%">
+                            <span class="progress-text">{{ result.percentage|floatformat:1 }}%</span>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- No Votes Yet -->
+        <div class="no-votes">
+            <i class="fas fa-inbox no-votes-icon"></i>
+            <h3>لا توجد أصوات بعد</h3>
+            <p class="text-muted">ستظهر النتائج هنا بمجرد أن يبدأ التصويت.</p>
+        </div>
+    {% endif %}
+
+    <!-- Actions Section -->
+    <div class="actions-section">
+        <div class="d-flex flex-wrap justify-content-center gap-2">
+            <a href="{% url 'dashboard' %}" class="btn btn-primary">
+                <i class="fas fa-home ms-2"></i>الرئيسية
+            </a>
+            {% if user.is_admin %}
+                <button id="printBtn" class="btn btn-outline-primary">
+                    <i class="fas fa-print ms-2"></i>طباعة النتائج
+                </button>
+                <button id="exportBtn" class="btn btn-outline-primary">
+                    <i class="fas fa-download ms-2"></i>تصدير البيانات
+                </button>
+            {% else %}
+                <button id="copyBtn" class="btn btn-outline-primary">
+                    <i class="fas fa-copy ms-2"></i>نسخ النتائج
+                </button>
+            {% endif %}
+        </div>
+
+        {% if poll.is_active %}
+            <div class="auto-refresh mt-3">
+                <i class="fas fa-sync refresh-indicator"></i>
+                سيتم تحديث الصفحة تلقائياً كل 30 ثانية
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// --- GLOBAL VARIABLES & DATA ---
+let currentChart = null;
+
+const chartData = {
+    labels: [
+        {% for result in options_with_results %}'{{ result.option.option_text|truncatechars:30|escapejs }}'{% if not forloop.last %},{% endif %}{% endfor %}
+    ],
+    votes: [
+        {% for result in options_with_results %}{{ result.vote_count }}{% if not forloop.last %},{% endif %}{% endfor %}
+    ],
+    percentages: [
+        {% for result in options_with_results %}{{ result.percentage|floatformat:2 }}{% if not forloop.last %},{% endif %}{% endfor %}
+    ]
+};
+
+// Enhanced color palette
+const themeColors = [
+    'rgba(59, 130, 246, 0.8)',   // Blue
+    'rgba(16, 185, 129, 0.8)',   // Green  
+    'rgba(245, 158, 11, 0.8)',   // Yellow
+    'rgba(239, 68, 68, 0.8)',    // Red
+    'rgba(139, 92, 246, 0.8)',   // Purple
+    'rgba(236, 72, 153, 0.8)',   // Pink
+    'rgba(20, 184, 166, 0.8)',   // Teal
+    'rgba(251, 146, 60, 0.8)',   // Orange
+];
+
+const themeBorderColors = themeColors.map(c => c.replace('0.8', '1'));
+
+// --- ENHANCED CHART FUNCTIONS ---
+function createChart(type) {
+    if (!document.getElementById('resultsChart')) return;
+    const ctx = document.getElementById('resultsChart').getContext('2d');
+
+    if (currentChart) {
+        currentChart.destroy();
+    }
+
+    let config = {
+        type: type === 'horizontalBar' ? 'bar' : type,
+        data: {
+            labels: chartData.labels,
+            datasets: [{
+                label: 'عدد الأصوات',
+                data: chartData.votes,
+                backgroundColor: themeColors.slice(0, chartData.labels.length),
+                borderColor: themeBorderColors.slice(0, chartData.labels.length),
+                borderWidth: 3,
+                borderRadius: (type === 'bar' || type === 'horizontalBar') ? 8 : 0,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            plugins: {
+                legend: {
+                    display: type === 'doughnut',
+                    position: 'bottom',
+                    labels: { 
+                        font: { family: 'Cairo, sans-serif', size: 13, weight: '600' },
+                        padding: 20,
+                        usePointStyle: true,
+                        pointStyle: 'rectRounded'
+                    }
+                },
+                tooltip: {
+                    rtl: true,
+                    titleFont: { family: 'Cairo, sans-serif', size: 16, weight: 'bold' },
+                    bodyFont: { family: 'Cairo, sans-serif', size: 14 },
+                    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    borderColor: '#3b82f6',
+                    borderWidth: 2,
+                    cornerRadius: 12,
+                    displayColors: true,
+                    callbacks: {
+                        label: function(context) {
+                            const totalVotes = {{ total_votes }};
+                            const votes = context.raw;
+                            const percentage = totalVotes > 0 ? ((votes / totalVotes) * 100).toFixed(1) : 0;
+                            return `${context.label}: ${votes} صوت (${percentage}%)`;
+                        },
+                        afterLabel: function(context) {
+                            const totalVotes = {{ total_votes }};
+                            const votes = context.raw;
+                            const rank = chartData.votes.filter(v => v > votes).length + 1;
+                            return `الترتيب: ${rank} من ${chartData.labels.length}`;
+                        }
+                    }
+                }
+            },
+            animation: {
+                duration: 1800,
+                easing: 'easeInOutCubic',
+                animateRotate: true,
+                animateScale: true
+            },
+            hover: {
+                animationDuration: 200
+            }
+        }
+    };
+
+    // Chart-specific configurations
+    if (type === 'doughnut') {
+        config.options.cutout = '65%';
+        config.options.plugins.tooltip.displayColors = false;
+    } else if (type === 'bar' || type === 'horizontalBar') {
+        const isHorizontal = type === 'horizontalBar';
+        config.options.indexAxis = isHorizontal ? 'y' : 'x';
+        config.options.scales = {
+            [isHorizontal ? 'x' : 'y']: { 
+                beginAtZero: true, 
+                grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                ticks: { 
+                    stepSize: 1, 
+                    font: { family: 'Cairo, sans-serif', size: 12 },
+                    color: '#374151'
+                }
+            },
+            [isHorizontal ? 'y' : 'x']: { 
+                grid: { display: false },
+                ticks: { 
+                    font: { family: 'Cairo, sans-serif', size: 12 },
+                    color: '#374151'
+                }
+            }
+        };
+    } else if (type === 'line') {
+        config.data.datasets[0].fill = true;
+        config.data.datasets[0].backgroundColor = 'rgba(59, 130, 246, 0.1)';
+        config.data.datasets[0].borderColor = '#3b82f6';
+        config.data.datasets[0].borderWidth = 4;
+        config.data.datasets[0].pointBackgroundColor = '#3b82f6';
+        config.data.datasets[0].pointBorderColor = '#ffffff';
+        config.data.datasets[0].pointBorderWidth = 3;
+        config.data.datasets[0].pointRadius = 8;
+        config.data.datasets[0].pointHoverRadius = 12;
+        config.data.datasets[0].tension = 0.4;
+        
+        config.options.scales = {
+            y: { 
+                beginAtZero: true,
+                grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                ticks: { 
+                    stepSize: 1,
+                    font: { family: 'Cairo, sans-serif', size: 12 },
+                    color: '#374151'
+                }
+            },
+            x: { 
+                grid: { display: false },
+                ticks: { 
+                    font: { family: 'Cairo, sans-serif', size: 12 },
+                    color: '#374151'
+                }
+            }
+        };
+    }
+
+    currentChart = new Chart(ctx, config);
+}
+
+function switchChartType(type, activeTab) {
+    document.querySelectorAll('.chart-tab').forEach(tab => tab.classList.remove('active'));
+    activeTab.classList.add('active');
+
+    const chartContainer = document.querySelector('.chart-container');
+    chartContainer.style.opacity = '0.6';
+    chartContainer.style.transform = 'scale(0.95)';
+
+    setTimeout(() => {
+        createChart(type);
+        chartContainer.style.opacity = '1';
+        chartContainer.style.transform = 'scale(1)';
+    }, 300);
+}
+
+// --- ENHANCED UTILITY FUNCTIONS ---
+// Replace your animateProgressBars function with this fixed version:
+function animateProgressBars() {
+    const progressBars = document.querySelectorAll('.progress-bar');
+    
+    if (progressBars.length === 0) {
+        console.log('No progress bars found');
+        return;
+    }
+    
+    console.log(`Found ${progressBars.length} progress bars to animate`);
+    
+    // Reset all bars to 0% first
+    progressBars.forEach(bar => {
+        bar.style.transition = 'none'; // Disable transition temporarily
+        bar.style.width = '0%';
+    });
+    
+    // Force browser to apply the 0% width
+    void document.body.offsetHeight;
+    
+    // Re-enable transitions and animate
+    setTimeout(() => {
+        progressBars.forEach((bar, index) => {
+            // Re-enable transition
+            bar.style.transition = 'width 2s cubic-bezier(0.4, 0, 0.2, 1)';
+            
+            // Stagger the animations
+            setTimeout(() => {
+                const rawWidth = bar.getAttribute('data-width');
+                const targetWidth = rawWidth.replace(',', '.'); // replace comma with dot
+                console.log(`Animating bar ${index + 1} to ${targetWidth}`);
+                if (targetWidth) {
+                    bar.style.width = targetWidth;
+                }
+            }, index * 200);
+        });
+    }, 50); // Small delay to ensure transition is re-enabled
+}
+
+function animateCounter(element, target) {
+    if (!element) return;
+    let current = 0;
+    const duration = 2000;
+    const stepTime = 50;
+    const steps = duration / stepTime;
+    const increment = target / steps;
+
+    const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+            clearInterval(timer);
+            element.textContent = target;
+            // Add a pulse effect when counter finishes
+            element.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                element.style.transform = 'scale(1)';
+            }, 200);
+        } else {
+            element.textContent = Math.floor(current);
+        }
+    }, stepTime);
+}
+
+function updateTimeRemaining() {
+    const timeElement = document.getElementById('timeRemaining');
+    if (!timeElement) return;
+
+    {% if poll.is_active %}
+    const endTime = new Date('{{ poll.end_time|date:"c" }}').getTime();
+    const now = new Date().getTime();
+    const distance = endTime - now;
+
+    if (distance > 0) {
+        const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((distance % (1000 * 60)) / 1000);
+
+        let str = d > 0 ? `${d}ي ${h}س` : h > 0 ? `${h}س ${m}د` : m > 0 ? `${m}د ${s}ث` : `${s}ث`;
+        timeElement.textContent = str;
+    } else {
+        timeElement.textContent = 'منتهي';
+        setTimeout(() => location.reload(), 2000);
+    }
+    {% endif %}
+}
+
+function printResults() {
+    // Set print timestamp
+    const now = new Date();
+    const printDate = now.toLocaleDateString('ar-EG', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    document.getElementById('printDate').textContent = printDate;
+    
+    // Trigger print
+    window.print();
+}
+
+function copyResults() {
+    let text = `نتائج استطلاع: {{ poll.title|escapejs }}\n`;
+    text += `تاريخ التقرير: ${new Date().toLocaleDateString('ar-EG')}\n`;
+    text += `إجمالي الأصوات: {{ total_votes }}\n`;
+    text += `حالة الاستطلاع: {% if poll.is_active %}مفتوح{% else %}منتهي{% endif %}\n\n`;
+    text += `النتائج التفصيلية:\n`;
+    text += `${'='.repeat(40)}\n`;
+    
+    {% for result in options_with_results %}
+    const percentage{{ forloop.counter }} = parseFloat('{{ result.percentage|floatformat:2|unlocalize }}');
+    text += `${{ forloop.counter }}. {{ result.option.option_text|escapejs }}\n`;
+    text += `   الأصوات: {{ result.vote_count }} (${percentage{{ forloop.counter }}}%)\n`;
+    text += `   ${'█'.repeat(Math.round(percentage{{ forloop.counter }}/2))}\n\n`;
+    {% endfor %}
+
+    navigator.clipboard.writeText(text).then(() => {
+        showNotification('تم نسخ النتائج بنجاح!', 'success');
+    }).catch(() => {
+        showNotification('فشل نسخ النتائج', 'error');
+    });
+}
+
+function exportResults() {
+    const now = new Date();
+    const data = {
+        poll_info: {
+            id: '{{ poll.id }}',
+            title: '{{ poll.title|escapejs }}',
+            description: '{{ poll.description|escapejs }}',
+            total_votes: {{ total_votes }},
+            status: '{% if poll.is_active %}active{% else %}closed{% endif %}',
+            created_at: '{{ poll.created_at|date:"c" }}',
+            start_time: '{{ poll.start_time|date:"c" }}',
+            end_time: '{{ poll.end_time|date:"c" }}',
+            export_timestamp: now.toISOString()
+        },
+        summary: {
+            total_options: {{ poll.options.count }},
+            highest_votes: {% if total_votes > 0 %}{{ options_with_results.0.vote_count }}{% else %}0{% endif %},
+            participation_rate: '{{ total_votes }} votes collected'
+        },
+        detailed_results: [
+            {% for result in options_with_results %}
+            {
+                rank: {{ forloop.counter }},
+                option_id: '{{ result.option.id }}',
+                option_text: '{{ result.option.option_text|escapejs }}',
+                vote_count: {{ result.vote_count }},
+                percentage: parseFloat('{{ result.percentage|floatformat:2|unlocalize }}'),
+                is_winner: {% if forloop.first and total_votes > 0 %}true{% else %}false{% endif %}
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ]
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `poll_results_{{ poll.id }}_${now.toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showNotification('تم تصدير البيانات بنجاح!', 'success');
+}
+
+function showNotification(message, type = 'info') {
+    // Create a more modern notification
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : 'info'} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = `
+        top: 20px; 
+        right: 20px; 
+        z-index: 1055; 
+        min-width: 300px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        border: none;
+    `;
+    notification.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>
+            <span>${message}</span>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// --- INITIALIZATION ---
+
+// Replace your DOMContentLoaded event listener with this:
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initializing poll results page...');
+    
+    // Animate counter
+    const totalVotesElement = document.getElementById('totalVotesCounter');
+    if (totalVotesElement) {
+        setTimeout(() => {
+            animateCounter(totalVotesElement, {{ total_votes }});
+        }, 300);
+    }
+    
+    // Animate progress bars - ONLY CALL ONCE with proper timing
+    if ({{ total_votes }} > 0) {
+        // Wait for DOM to be fully painted
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                animateProgressBars();
+            }, 500);
+        });
+        
+        // Initialize chart
+        setTimeout(() => {
+            createChart('doughnut');
+        }, 1000);
+    }
+    
+    // Set up event listeners for chart tabs
+    document.querySelectorAll('.chart-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            switchChartType(this.dataset.chartType, this);
+        });
+    });
+
+    // Set up event listeners for action buttons
+    const printBtn = document.getElementById('printBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    
+    if (printBtn) printBtn.addEventListener('click', printResults);
+    if (copyBtn) copyBtn.addEventListener('click', copyResults);
+    if (exportBtn) exportBtn.addEventListener('click', exportResults);
+
+    // Countdown timer and auto-refresh for active polls
+    {% if poll.is_active %}
+        updateTimeRemaining();
+        setInterval(updateTimeRemaining, 1000);
+        
+        // More intelligent auto-refresh
+        let refreshTimer = setTimeout(() => {
+            if (document.visibilityState === 'visible' && !document.querySelector('.modal.show')) {
+                location.reload();
+            }
+        }, 30000);
+        
+        // Clear refresh if user becomes inactive
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                clearTimeout(refreshTimer);
+            }
+        });
+    {% endif %}
+    
+    // Remove the animate classes that might interfere
+    // Add them only after progress bars are animated
+    setTimeout(() => {
+        const resultItems = document.querySelectorAll('.result-item');
+        resultItems.forEach((item, index) => {
+            item.style.animationDelay = `${index * 0.1}s`;
+            // Don't add animate classes if they interfere with progress bars
+        });
+    }, 2000);
+    
+    console.log('Poll results page initialized successfully');
+});
+
+// Add before closing script tag - Print date functionality
+window.addEventListener('beforeprint', () => {
+    const now = new Date();
+    const printDate = now.toLocaleDateString('ar-EG', {
+        year: 'numeric',
+        month: 'long', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    document.getElementById('printDate').textContent = printDate;
+});
+</script>
+{% endblock %}
