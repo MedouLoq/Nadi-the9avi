@@ -561,13 +561,7 @@
                                     <i class="fas fa-list ms-1"></i>
                                     الاستطلاعات
                                 </a>
-                            </li>
-                               <li class="nav-item">
-                                <a class="nav-link" href="{% url 'registered_users' %}">
-                                    <i class="fas fa-users ms-1"></i>
-                                    لائحة الناخبين
-                                </a>
-                            </li>
+                          
                         {% endif %}
                     <li class="nav-item">
                             <a class="nav-link" href="{% url 'teams_list' %}">
@@ -575,6 +569,13 @@
                                 اللوائح المسجلة
                             </a>
                         </li>
+                          </li>
+                               <li class="nav-item">
+                                <a class="nav-link" href="{% url 'registered_users' %}">
+                                    <i class="fas fa-users ms-1"></i>
+                                    لائحة الناخبين
+                                </a>
+                            </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'logout' %}">
                                 <i class="fas fa-sign-out-alt ms-1"></i>

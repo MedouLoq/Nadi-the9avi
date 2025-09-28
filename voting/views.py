@@ -117,9 +117,9 @@ def register_view(request):
 @login_required
 def registered_users_view(request):
     """View registered users - Admin only"""
-    if not request.user.is_admin():
-        messages.error(request, 'ليس لديك صلاحية للوصول')
-        return redirect('dashboard')
+    # if not request.user.is_admin():
+    #     messages.error(request, 'ليس لديك صلاحية للوصول')
+    #     return redirect('dashboard')
     
     # Search and filter functionality
     search_query = request.GET.get('search', '')
