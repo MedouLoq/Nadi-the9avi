@@ -42,6 +42,9 @@
         0% { transform: translate(0, 0); }
         100% { transform: translate(-50px, -50px); }
     }
+        .print-header {
+        display: none;
+    }
     
     .poll-title {
         font-size: 2.2rem;
@@ -375,143 +378,412 @@
     }
     
     /* Print Styles - Enhanced */
-    @media print {
-        body { 
-            background: white !important; 
-            font-size: 12pt;
-            line-height: 1.4;
+   /* ================== PRINT-ONLY STYLES ================== */
+/* ================== PRINT-ONLY STYLES ================== */
+/* ================== PRINT-ONLY STYLES ================== */
+@media print {
+    /* Hide everything by default */
+    * {
+        visibility: hidden;
+    }
+
+    /* Hide screen content completely */
+    .results-container,
+    nav, 
+    footer, 
+    .actions-section, 
+    .auto-refresh, 
+    .chart-tabs,
+    .btn,
+    button {
+        display: none !important;
+    }
+
+    /* Show only print content */
+    .print-only-content,
+    .print-only-content * {
+        visibility: visible;
+    }
+
+    /* Reset print layout */
+    .print-only-content {
+        display: block !important;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background: white;
+        color: black;
+        font-family: 'Arial', sans-serif;
+        font-size: 12pt;
+        line-height: 1.4;
+        padding: 0;
+        margin: 0;
+    }
+
+    /* Print Page Setup */
+    @page {
+        size: A4;
+        margin: 15mm;
+        @top-center {
+            content: "تقرير نتائج الاستطلاع";
         }
-        
-        nav, footer, .actions-section, .auto-refresh, .chart-tabs { 
-            display: none !important; 
-        }
-        
-        .results-container { 
-            box-shadow: none !important; 
-            border: 2px solid #333;
-            margin: 0;
-            border-radius: 0;
-        }
-        
-        .poll-header { 
-            background: #2563eb !important;
-            color: white !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-            page-break-inside: avoid;
-        }
-        
-        .poll-header::before {
-            display: none;
-        }
-        
-        .poll-title {
-            font-size: 24pt;
-            margin-bottom: 10pt;
-        }
-        
-        .poll-description {
-            font-size: 14pt;
-        }
-        
-        .stats-grid {
-            page-break-inside: avoid;
-            border-bottom: 2px solid #333;
-        }
-        
-        .stat-card {
-            background: #f8f9fa !important;
-            border: 1px solid #333 !important;
-            box-shadow: none !important;
-            margin-bottom: 10pt;
-        }
-        
-        .stat-number {
-            color: #2563eb !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-        
-        .chart-section {
-            page-break-before: always;
-            padding: 20pt 15pt;
-        }
-        
-        .chart-container { 
-            page-break-inside: avoid;
-            background: #f8f9fa !important;
-            border: 1px solid #333 !important;
-            box-shadow: none !important;
-        }
-        
-        .results-list {
-            page-break-before: auto;
-            padding: 20pt 15pt;
-        }
-        
-   
-        
-        .result-item:hover::before {
-            display: none;
-        }
-        
-       
-        
-        .vote-info {
-            background: #f8f9fa !important;
-            border: 1px solid #333 !important;
-            color: #2563eb !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-        
-        .section-title {
-            font-size: 18pt;
-            margin-bottom: 15pt;
-        }
-        
-        .section-title::after {
-            background: #2563eb !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-        
-        /* Print header with logo and timestamp */
-        .print-header {
-            display: block !important;
-            text-align: center;
-            padding: 15pt;
-            border-bottom: 2px solid #333;
-            margin-bottom: 20pt;
-        }
-        
-        .print-logo {
-            max-height: 60pt;
-            margin-bottom: 10pt;
-        }
-        
-        .print-timestamp {
-            font-size: 10pt;
-            color: #666;
-            margin-top: 10pt;
-        }
-        
-        .winner-crown {
-            color: #f59e0b !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-        
-        /* Ensure all critical elements print */
-        * {
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
+        @bottom-center {
+            content: counter(page) " من " counter(pages);
         }
     }
+
+    /* ================ PRINT HEADER SECTION ================ */
+    .print-header-section {
+        text-align: center;
+        padding: 20pt 0 30pt 0;
+        border-bottom: 3pt solid #2563eb;
+        margin-bottom: 25pt;
+        page-break-after: avoid;
+    }
+
+    .print-logo-container {
+        margin-bottom: 15pt;
+    }
+
+    .print-logo {
+        width: 80pt;
+        height: 80pt;
+        max-width: 80pt;
+        max-height: 80pt;
+        object-fit: contain;
+        border: 2pt solid #2563eb;
+        border-radius: 50%;
+        padding: 5pt;
+    }
+
+    .print-title-section {
+        margin: 15pt 0;
+    }
+
+    .print-main-title {
+        font-size: 20pt;
+        font-weight: bold;
+        color: #2563eb;
+        margin: 0 0 10pt 0;
+        text-align: center;
+    }
+
+    .print-poll-title {
+        font-size: 16pt;
+        font-weight: bold;
+        color: #1e293b;
+        margin: 0 0 8pt 0;
+        text-align: center;
+    }
+
+    .print-description {
+        font-size: 11pt;
+        color: #64748b;
+        margin: 0 0 15pt 0;
+        text-align: center;
+        font-style: italic;
+    }
+
+    .print-meta-info {
+        background: #f8fafc;
+        padding: 12pt;
+        border-radius: 8pt;
+        margin-top: 15pt;
+        border: 1pt solid #e2e8f0;
+    }
+
+    .print-date,
+    .print-status {
+        font-size: 10pt;
+        margin: 3pt 0;
+        text-align: center;
+        font-weight: 500;
+    }
+
+    /* ================ PRINT STATISTICS SECTION ================ */
+    .print-stats-section {
+        margin: 25pt 0;
+        page-break-inside: avoid;
+    }
+
+    .print-section-title {
+        font-size: 14pt;
+        font-weight: bold;
+        color: #2563eb;
+        margin: 0 0 15pt 0;
+        text-align: right;
+        padding-bottom: 5pt;
+        border-bottom: 1pt solid #e2e8f0;
+    }
+
+    .print-stats-grid {
+        display: table;
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 5pt;
+    }
+
+    .print-stat-item {
+        display: table-row;
+        page-break-inside: avoid;
+    }
+
+    .print-stat-label,
+    .print-stat-value {
+        display: table-cell;
+        padding: 8pt 12pt;
+        border: 1pt solid #e2e8f0;
+        background: #f8fafc;
+    }
+
+    .print-stat-label {
+        font-weight: 600;
+        color: #374151;
+        width: 60%;
+        text-align: right;
+    }
+
+    .print-stat-value {
+        font-weight: bold;
+        color: #2563eb;
+        text-align: center;
+        width: 40%;
+    }
+
+    /* ================ PRINT CHART SECTION ================ */
+    .print-chart-section {
+        margin: 20pt 0;
+        text-align: center;
+        page-break-inside: avoid;
+    }
+
+    .print-chart-container {
+        background: white;
+        border: 1pt solid #e2e8f0;
+        border-radius: 8pt;
+        padding: 15pt;
+        margin: 10pt 0;
+        display: inline-block;
+    }
+
+    .print-chart-img {
+        max-width: 400pt;
+        max-height: 300pt;
+        width: auto;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+    }
+
+    /* ================ PRINT RESULTS TABLE ================ */
+    .print-results-section {
+        margin: 25pt 0;
+        page-break-inside: avoid;
+    }
+
+    .print-results-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15pt;
+        font-size: 11pt;
+    }
+
+    .print-results-table th {
+        background: #2563eb;
+        color: white;
+        padding: 10pt 8pt;
+        text-align: center;
+        font-weight: bold;
+        border: 1pt solid #1e40af;
+        page-break-after: avoid;
+    }
+
+    .print-results-table td {
+        padding: 8pt;
+        border: 1pt solid #e2e8f0;
+        text-align: center;
+        page-break-inside: avoid;
+    }
+
+    .print-results-table tr:nth-child(even) {
+        background: #f8fafc;
+    }
+
+    .print-results-table tr:hover {
+        background: none; /* Disable hover in print */
+    }
+
+    /* Table Cells Specific Styling */
+    .rank-cell {
+        width: 10%;
+        font-weight: bold;
+        color: #2563eb;
+    }
+
+    .option-cell {
+        width: 35%;
+        text-align: right;
+        font-weight: 500;
+    }
+
+    .votes-cell {
+        width: 15%;
+        font-weight: bold;
+        color: #059669;
+    }
+
+    .percentage-cell {
+        width: 15%;
+        font-weight: bold;
+        color: #dc2626;
+    }
+
+    .chart-cell {
+        width: 25%;
+        padding: 5pt;
+    }
+
+    /* Winner Indicator */
+    .winner-indicator {
+        color: #f59e0b;
+        font-size: 12pt;
+        margin-left: 3pt;
+    }
+
+    /* Print Bar Chart */
+    .print-bar-container {
+        width: 100%;
+        height: 12pt;
+        background: #e2e8f0;
+        border-radius: 6pt;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .print-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #3b82f6, #2563eb);
+        border-radius: 6pt;
+        min-width: 2pt; /* Minimum width for visibility */
+        /* Width will be set by inline style from template */
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    /* ================ PRINT NO VOTES SECTION ================ */
+    .print-no-votes {
+        text-align: center;
+        padding: 30pt;
+        color: #64748b;
+        font-style: italic;
+        border: 2pt dashed #e2e8f0;
+        border-radius: 10pt;
+        background: #f8fafc;
+    }
+
+    /* ================ PRINT FOOTER SECTION ================ */
+    .print-footer-section {
+        margin-top: 30pt;
+        padding-top: 20pt;
+        page-break-inside: avoid;
+    }
+
+    .print-footer-line {
+        width: 100%;
+        height: 2pt;
+        background: #2563eb;
+        margin-bottom: 15pt;
+    }
+
+    .print-footer-content {
+        display: table;
+        width: 100%;
+    }
+
+    .print-club-info,
+    .print-generation-info {
+        display: table-cell;
+        width: 50%;
+        font-size: 10pt;
+        color: #64748b;
+    }
+
+    .print-club-info {
+        text-align: right;
+        font-weight: 600;
+    }
+
+    .print-generation-info {
+        text-align: left;
+        font-style: italic;
+    }
+
+    /* ================ PRINT-SPECIFIC UTILITIES ================ */
+    .page-break {
+        page-break-before: always;
+    }
+
+    .avoid-break {
+        page-break-inside: avoid;
+    }
+
+    /* Ensure proper Arabic text rendering in print */
+    .print-only-content {
+        direction: rtl;
+        text-align: right;
+    }
+
+    .print-results-table th:first-child,
+    .print-results-table td:first-child {
+        text-align: center;
+    }
+
+    /* Fix for browsers that don't handle print colors well */
+    .print-section-title,
+    .print-stat-value,
+    .winner-indicator {
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .print-results-table th {
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .print-bar {
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
+
+/* ================== SCREEN-ONLY STYLES (keep existing) ================== */
+@media screen {
+    .print-only-content {
+        display: none !important;
+    }
+}
+
+/* ================== SCREEN-ONLY STYLES (keep existing) ================== */
+@media screen {
+    .print-only-content {
+        display: none !important;
+    }
+}
+
+/* ================== SCREEN-ONLY STYLES (keep existing) ================== */
+@media screen {
+    .print-only-content {
+        display: none !important;
+    }
+}
     
-    .print-header {
-        display: none;
-    }
+
     
     /* Responsive Design */
     @media (max-width: 767px) {
@@ -675,6 +947,124 @@
                 سيتم تحديث الصفحة تلقائياً كل 30 ثانية
             </div>
         {% endif %}
+    </div>
+</div>
+
+<!-- Print-Only Version (hidden on screen) -->
+<!-- Print-Only Version (hidden on screen) -->
+<div class="print-only-content" style="display: none;">
+    <!-- Print Header -->
+    <div class="print-header-section">
+        <div class="print-logo-container">
+            <img src="{{ logo_url }}" alt="شعار النادي" class="print-logo">
+        </div>
+        <div class="print-title-section">
+            <h1 class="print-main-title">تقرير نتائج الاستطلاع</h1>
+            <h2 class="print-poll-title">{{ poll.title }}</h2>
+            {% if poll.description %}
+                <p class="print-description">{{ poll.description }}</p>
+            {% endif %}
+        </div>
+        <div class="print-meta-info">
+            <div class="print-date">تاريخ التقرير: <span id="printReportDate"></span></div>
+            <div class="print-status">
+                الحالة: 
+                {% if poll.is_active %}
+                    التصويت مفتوح
+                {% else %}
+                    التصويت منتهي
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Statistics -->
+    <div class="print-stats-section">
+        <h3 class="print-section-title">إحصائيات الاستطلاع</h3>
+        <div class="print-stats-grid">
+            <div class="print-stat-item">
+                <span class="print-stat-label">إجمالي الأصوات:</span>
+                <span class="print-stat-value">{{ total_votes }}</span>
+            </div>
+            <div class="print-stat-item">
+                <span class="print-stat-label">عدد الخيارات:</span>
+                <span class="print-stat-value">{{ poll.options.count }}</span>
+            </div>
+            <div class="print-stat-item">
+                <span class="print-stat-label">أعلى تصويت:</span>
+                <span class="print-stat-value">
+                    {% if total_votes > 0 %}{{ options_with_results.0.vote_count }}{% else %}0{% endif %}
+                </span>
+            </div>
+            <div class="print-stat-item">
+                <span class="print-stat-label">تاريخ الإنشاء:</span>
+                <span class="print-stat-value">{{ poll.created_at|date:"Y/m/d" }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Chart Section -->
+    {% if total_votes > 0 %}
+    <div class="print-chart-section">
+        <h3 class="print-section-title">الرسم البياني</h3>
+        <div class="print-chart-container">
+            <img id="printChartImage" src="" alt="رسم بياني للنتائج" class="print-chart-img">
+        </div>
+    </div>
+
+    <!-- Print Results Table -->
+    <div class="print-results-section">
+        <h3 class="print-section-title">النتائج التفصيلية</h3>
+        <table class="print-results-table">
+            <thead>
+                <tr>
+                    <th>الترتيب</th>
+                    <th>الخيار</th>
+                    <th>عدد الأصوات</th>
+                    <th>النسبة المئوية</th>
+                    <th>التمثيل البياني</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in options_with_results %}
+                <tr>
+                    <td class="rank-cell">
+                        {% if forloop.first %}
+                            <span class="winner-indicator">👑</span>
+                        {% endif %}
+                        {{ forloop.counter }}
+                    </td>
+                    <td class="option-cell">{{ result.option.option_text }}</td>
+                    <td class="votes-cell">{{ result.vote_count }}</td>
+                    <td class="percentage-cell">{{ result.percentage|floatformat:1 }}%</td>
+                    <td class="chart-cell">
+                        <div class="print-bar-container">
+                            <div class="print-bar"></div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="print-no-votes">
+        <p>لا توجد أصوات مسجلة في هذا الاستطلاع حتى الآن.</p>
+    </div>
+    {% endif %}
+
+    <!-- Print Footer -->
+    <div class="print-footer-section">
+        <div class="print-footer-line"></div>
+        <div class="print-footer-content">
+            <div class="print-club-info">
+                <strong>النادي الثقافي لشباب لبير</strong><br>
+                منصة التصويت الإلكتروني
+            </div>
+            <div class="print-generation-info">
+                تم إنشاء هذا التقرير تلقائياً في: <span id="printGenerationTime"></span>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -956,21 +1346,158 @@ function updateTimeRemaining() {
     {% endif %}
 }
 
+// Enhanced Print Functions
+// Debug function to check bar widths
+// Function to populate print bar widths from screen data
+function populatePrintBars() {
+    const screenBars = document.querySelectorAll('.results-list .progress-bar');
+    const printBars = document.querySelectorAll('.print-bar');
+    
+    console.log(`Found ${screenBars.length} screen bars and ${printBars.length} print bars`);
+    
+    // Copy widths from screen bars to print bars
+    screenBars.forEach((screenBar, index) => {
+        if (printBars[index]) {
+            const dataWidth = screenBar.getAttribute('data-width');
+            if (dataWidth) {
+                // Fix decimal separator issue: replace comma with dot for CSS
+                const cssWidth = dataWidth.replace(',', '.');
+                printBars[index].style.width = cssWidth;
+                console.log(`Set print bar ${index + 1} width to: ${cssWidth} (original: ${dataWidth})`);
+            }
+        }
+    });
+}
+
+// Debug function to check bar widths
+function debugPrintBars() {
+    const bars = document.querySelectorAll('.print-bar');
+    console.log('Print bars found:', bars.length);
+    bars.forEach((bar, index) => {
+        const width = bar.style.width;
+        console.log(`Bar ${index + 1}: width = "${width}"`);
+    });
+}
+
+// Enhanced Print Functions
 function printResults() {
-    // Set print timestamp
+    // Populate print bars with correct widths
+    populatePrintBars();
+    
+    // Debug bars after populating
+    debugPrintBars();
+    
+    // Capture chart first, then prepare other data
+    captureChartForPrint()
+        .then(() => {
+            preparePrintData();
+            setTimeout(() => {
+                window.print();
+            }, 200);
+        })
+        .catch(error => {
+            console.error('Error capturing chart:', error);
+            // Print anyway without chart
+            preparePrintData();
+            setTimeout(() => {
+                window.print();
+            }, 100);
+        });
+}
+
+function captureChartForPrint() {
+    return new Promise((resolve, reject) => {
+        if (!currentChart) {
+            console.log('No chart available to capture');
+            resolve();
+            return;
+        }
+
+        try {
+            // Get canvas element
+            const canvas = document.getElementById('resultsChart');
+            if (!canvas) {
+                console.log('Canvas element not found');
+                resolve();
+                return;
+            }
+
+            // Create high-quality image
+            const dataURL = currentChart.toBase64Image('image/png', 1.0);
+            
+            // Set the image source for print
+            const printChartImg = document.getElementById('printChartImage');
+            if (printChartImg) {
+                printChartImg.src = dataURL;
+                printChartImg.style.display = 'block';
+                console.log('Chart captured successfully for print');
+            }
+            
+            resolve();
+        } catch (error) {
+            console.error('Error capturing chart:', error);
+            reject(error);
+        }
+    });
+}
+
+function preparePrintData() {
+    // Set current date and time for print
     const now = new Date();
-    const printDate = now.toLocaleDateString('ar-EG', {
+    
+    // Format date for Arabic locale
+    const reportDate = now.toLocaleDateString('ar-EG', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+        weekday: 'long'
     });
-    document.getElementById('printDate').textContent = printDate;
     
-    // Trigger print
-    window.print();
+    const generationTime = now.toLocaleString('ar-EG', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+    });
+    
+    // Update print elements
+    const reportDateEl = document.getElementById('printReportDate');
+    const generationTimeEl = document.getElementById('printGenerationTime');
+    
+    if (reportDateEl) {
+        reportDateEl.textContent = reportDate;
+    }
+    
+    if (generationTimeEl) {
+        generationTimeEl.textContent = generationTime;
+    }
+    
+    console.log('Print data prepared successfully');
 }
+
+// Enhanced print event listeners
+window.addEventListener('beforeprint', () => {
+    // Populate print bars with correct widths
+    populatePrintBars();
+    
+    // Capture chart if not already done
+    if (currentChart && !document.getElementById('printChartImage').src) {
+        captureChartForPrint().then(() => {
+            preparePrintData();
+        });
+    } else {
+        preparePrintData();
+    }
+    console.log('Print preview opened');
+});
+
+window.addEventListener('afterprint', () => {
+    console.log('Print dialog closed');
+});
+
 
 function copyResults() {
     let text = `نتائج استطلاع: {{ poll.title|escapejs }}\n`;

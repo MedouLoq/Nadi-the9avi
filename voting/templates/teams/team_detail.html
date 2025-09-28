@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ team.name }} - تفاصيل الفريق{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">
+                    <i class="fas fa-users me-2"></i>
+                    {{ team.name }}
+                </h3>
+                <div>
+                    <a href="{% url 'teams_list' %}" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-right me-2"></i>
+                        العودة للقائمة
+                    </a>
+                    {% if can_edit %}
+                    <a href="{% url 'edit_team' team.id %}" class="btn btn-primary">
+                        <i class="fas fa-edit me-2"></i>
+                        تعديل
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Team Image -->
+                    <div class="col-md-4 mb-4">
+                        {% if team.image %}
+                        <div class="team-image-large">
+                            <img src="{{ team.image.url }}" alt="{{ team.name }}" class="img-fluid rounded">
+                        </div>
+                        {% else %}
+                        <div class="team-placeholder-large">
+                            <i class="fas fa-users fa-5x text-muted"></i>
+                            <p class="text-muted mt-3">لا توجد صورة</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Team Information -->
+                    <div class="col-md-8">
+                        <div class="team-info">
+                            <h4 class="text-primary mb-3">معلومات الفريق</h4>
+                            
+                            {% if team.description %}
+                            <div class="mb-4">
+                                <h6><i class="fas fa-info-circle me-2"></i>الوصف</h6>
+                                <p class="text-muted">{{ team.description|linebreaks }}</p>
+                            </div>
+                            {% endif %}
+                            
+                            {% if team.contact_info %}
+                            <div class="mb-4">
+                                <h6><i class="fas fa-phone me-2"></i>معلومات التواصل</h6>
+                                <p class="text-muted">{{ team.contact_info|linebreaks }}</p>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="mb-4">
+                                <h6><i class="fas fa-calendar me-2"></i>تاريخ التسجيل</h6>
+                                <p class="text-muted">{{ team.created_at|date:"Y-m-d H:i" }}</p>
+                            </div>
+                            
+                            <!-- Download Program Document -->
+                            {% if team.program_document %}
+                            <div class="mb-4">
+                                <h6><i class="fas fa-file-pdf me-2"></i>البرنامج الانتخابي</h6>
+                                <a href="{{ team.program_document.url }}" 
+                                   class="btn btn-success btn-lg" 
+                                   target="_blank">
+                                    <i class="fas fa-download me-2"></i>
+                                    تحميل البرنامج الانتخابي
+                                </a>
+                                <small class="d-block text-muted mt-2">
+                                    اضغط لتحميل وعرض البرنامج الانتخابي للفريق
+                                </small>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Voting Statistics (if available) -->
+                            {% if team.get_vote_count > 0 %}
+                            <div class="mb-4">
+                                <h6><i class="fas fa-chart-bar me-2"></i>إحصائيات التصويت</h6>
+                                <div class="alert alert-info">
+                                    <i class="fas fa-vote-yea me-2"></i>
+                                    إجمالي الأصوات: <strong>{{ team.get_vote_count }}</strong>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Related Polls (if any) -->
+                {% if team.options.exists %}
+                <hr class="my-5">
+                <div class="related-polls">
+                    <h5 class="mb-3">
+                        <i class="fas fa-poll me-2"></i>
+                        الاستطلاعات المتعلقة بهذا الفريق
+                    </h5>
+                    <div class="row">
+                        {% for option in team.options.all %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card border-primary">
+                                <div class="card-body">
+                                    <h6 class="card-title">{{ option.poll.title }}</h6>
+                                    <p class="card-text text-muted">{{ option.option_text }}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">
+                                            {{ option.poll.start_time|date:"Y-m-d" }}
+                                        </small>
+                                        <span class="badge bg-primary">
+                                            {{ option.get_vote_count }} صوت
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.team-image-large img {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.team-placeholder-large {
+    height: 300px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.team-info h6 {
+    color: var(--primary-blue);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.related-polls .card {
+    transition: transform 0.2s ease;
+}
+
+.related-polls .card:hover {
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}

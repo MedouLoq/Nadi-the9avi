@@ -29,7 +29,7 @@
                         </div>
                         <div class="form-text" id="help-text">
                             <i class="fas fa-info-circle ms-1"></i>
-                            <span id="input-hint">رقم الهاتف الموريتاني (8 أرقام) أو اسم المستخدم للمديرين</span>
+                            <span id="input-hint">رقم الهاتف ال (8 أرقام) أو اسم المستخدم للمديرين</span>
                         </div>
                     </div>
                     
@@ -132,7 +132,7 @@
             // It's a phone number
             prefixIndicator.style.display = 'block';
             prefixIndicator.textContent = '222+';
-            helpText.textContent = 'رقم الهاتف الموريتاني (8 أرقام)';
+            helpText.textContent = 'رقم الهاتف  (8 أرقام)';
             
             // Limit to 8 digits
             if (value.length > 8) {
@@ -184,7 +184,7 @@
                 if (!errorDiv) {
                     errorDiv = document.createElement('div');
                     errorDiv.className = 'invalid-feedback login-error';
-                    errorDiv.textContent = 'يرجى إدخال رقم هاتف موريتاني صحيح (8 أرقام تبدأ بـ 2 أو 3 أو 4)';
+                    errorDiv.textContent = 'يرجى إدخال رقم هاتف  صحيح (8 أرقام تبدأ بـ 2 أو 3 أو 4)';
                     loginInput.parentNode.appendChild(errorDiv);
                 }
                 return false;

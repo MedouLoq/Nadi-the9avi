@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+
+{% block title %}تعديل الفريق - {{ team.name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">
+                    <i class="fas fa-edit me-2"></i>
+                    تعديل الفريق: {{ team.name }}
+                </h3>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <!-- Team Name -->
+                    <div class="mb-3">
+                        <label for="name" class="form-label">
+                            <i class="fas fa-users me-2"></i>
+                            اسم الفريق <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="name" 
+                               name="name"
+                               value="{{ team.name }}"
+                               required>
+                    </div>
+                    
+                    <!-- Description -->
+                    <div class="mb-3">
+                        <label for="description" class="form-label">
+                            <i class="fas fa-info-circle me-2"></i>
+                            الوصف
+                        </label>
+                        <textarea class="form-control" 
+                                  id="description" 
+                                  name="description"
+                                  rows="4"
+                                  placeholder="وصف مختصر عن الفريق ومبادئه">{{ team.description }}</textarea>
+                    </div>
+                    
+                    <!-- Contact Information -->
+                    <div class="mb-3">
+                        <label for="contact_info" class="form-label">
+                            <i class="fas fa-phone me-2"></i>
+                            معلومات التواصل
+                        </label>
+                        <textarea class="form-control" 
+                                  id="contact_info" 
+                                  name="contact_info"
+                                  rows="3"
+                                  placeholder="معلومات التواصل مع الفريق">{{ team.contact_info }}</textarea>
+                    </div>
+                    
+                    <!-- Current Image -->
+                    {% if team.image %}
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-image me-2"></i>
+                            الصورة الحالية
+                        </label>
+                        <div class="current-image-container">
+                            <img src="{{ team.image.url }}" alt="{{ team.name }}" class="current-image">
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Team Image -->
+                    <div class="mb-3">
+                        <label for="image" class="form-label">
+                            <i class="fas fa-image me-2"></i>
+                            {% if team.image %}تغيير صورة الفريق{% else %}إضافة صورة الفريق{% endif %}
+                        </label>
+                        <input type="file" 
+                               class="form-control" 
+                               id="image" 
+                               name="image"
+                               accept="image/*">
+                        <small class="form-text text-muted">
+                            {% if team.image %}اتركه فارغاً للاحتفاظ بالصورة الحالية - {% endif %}يفضل رفع صورة بجودة عالية (PNG, JPG) - الحد الأقصى 5MB
+                        </small>
+                    </div>
+                    
+                    <!-- Current Program Document -->
+                    {% if team.program_document %}
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-file-pdf me-2"></i>
+                            البرنامج الانتخابي الحالي
+                        </label>
+                        <div class="alert alert-info">
+                            <i class="fas fa-file-pdf me-2"></i>
+                            <a href="{{ team.program_document.url }}" target="_blank" class="alert-link">
+                                عرض البرنامج الحالي
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Program Document -->
+                    <div class="mb-3">
+                        <label for="program_document" class="form-label">
+                            <i class="fas fa-file-pdf me-2"></i>
+                            {% if team.program_document %}تحديث البرنامج الانتخابي{% else %}إضافة البرنامج الانتخابي{% endif %}
+                        </label>
+                        <input type="file" 
+                               class="form-control" 
+                               id="program_document" 
+                               name="program_document"
+                               accept=".pdf,.doc,.docx">
+                        <small class="form-text text-muted">
+                            {% if team.program_document %}اتركه فارغاً للاحتفاظ بالبرنامج الحالي - {% endif %}رفع البرنامج الانتخابي (PDF, DOC, DOCX) - الحد الأقصى 10MB
+                        </small>
+                    </div>
+                    
+                    <!-- Status -->
+                    <div class="mb-4">
+                        <div class="form-check">
+                            <input class="form-check-input" 
+                                   type="checkbox" 
+                                   id="is_active" 
+                                   name="is_active"
+                                   {% if team.is_active %}checked{% endif %}>
+                            <label class="form-check-label" for="is_active">
+                                <i class="fas fa-toggle-on me-2"></i>
+                                الفريق نشط
+                            </label>
+                        </div>
+                        <small class="form-text text-muted">
+                            إذا كان غير نشط، لن يظهر الفريق في القائمة العامة
+                        </small>
+                    </div>
+                    
+                    <!-- Buttons -->
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'team_management' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-right me-2"></i>
+                            إلغاء
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>
+                            حفظ التغييرات
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.current-image-container {
+    max-width: 300px;
+    margin-bottom: 10px;
+}
+
+.current-image {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Preview image upload
+    const imageInput = document.getElementById('image');
+    imageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            // Check file size (5MB limit)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('حجم الصورة كبير جداً. يرجى اختيار صورة أصغر من 5MB');
+                e.target.value = '';
+                return;
+            }
+        }
+    });
+    
+    // Check document file size
+    const docInput = document.getElementById('program_document');
+    docInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            // Check file size (10MB limit)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('حجم الملف كبير جداً. يرجى اختيار ملف أصغر من 10MB');
+                e.target.value = '';
+                return;
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -13,6 +13,18 @@ from django.views.generic import View
 import random
 import json
 from datetime import timedelta
+from django.db.models import Count, Q
+from django.core.paginator import Paginator
+from django.http import HttpResponse
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from io import BytesIO
+
+from .models import CustomUser, Poll, Option, Vote, OTPLog, Team  # Add Team import
 
 from .models import CustomUser, Poll, Option, Vote, OTPLog
 from .utils import send_sms_otp  # You'll need to implement this with your SMS API
@@ -20,13 +32,34 @@ from .utils import send_sms_otp  # You'll need to implement this with your SMS A
 
 # ==================== Authentication Views ====================
 
+# Add these imports to your existing views.py
+from django.db.models import Count, Q
+from django.core.paginator import Paginator
+from django.http import HttpResponse
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from io import BytesIO
+
+from .models import CustomUser, Poll, Option, Vote, OTPLog, Team  # Add Team import
+
+# Update the register_view to include full_name
 def register_view(request):
-    """User registration with phone number"""
+    """User registration with phone number and full name"""
+    if request.user.is_authenticated:
+        if request.user.is_admin():
+            return redirect('admin_dashboard')
+        else:
+            return redirect('dashboard')
     if request.method == 'POST':
         phone_number = request.POST.get('phone_number')
+        full_name = request.POST.get('full_name')  # NEW: Get full name
         
-        if not phone_number:
-            messages.error(request, 'رقم الهاتف مطلوب')
+        if not phone_number or not full_name:  # NEW: Require full name
+            messages.error(request, 'رقم الهاتف والاسم الكامل مطلوبان')
             return render(request, 'registration/register.html')
         
         # Format phone number for Mauritania (normalize to 8 digits)
@@ -34,7 +67,7 @@ def register_view(request):
         formatted_phone = format_mauritanian_phone(phone_number)
         
         if not formatted_phone:
-            messages.error(request, 'يرجى إدخال رقم هاتف موريتاني صحيح (8 أرقام تبدأ بـ 2 أو 3 أو 4)')
+            messages.error(request, 'يرجى إدخال رقم هاتف  صحيح (8 أرقام تبدأ بـ 2 أو 3 أو 4)')
             return render(request, 'registration/register.html')
         
         # Store the formatted number with +222 prefix for consistency
@@ -50,6 +83,7 @@ def register_view(request):
             user = CustomUser.objects.create_user(
                 phone_number=full_phone_number,
                 username=full_phone_number,
+                full_name=full_name,  # NEW: Add full name
                 user_type='user',
                 is_phone_verified=False,
                 otp_created_at=timezone.now()
@@ -79,6 +113,262 @@ def register_view(request):
     
     return render(request, 'registration/register.html')
 
+# NEW: View for registered users list
+@login_required
+def registered_users_view(request):
+    """View registered users - Admin only"""
+    if not request.user.is_admin():
+        messages.error(request, 'ليس لديك صلاحية للوصول')
+        return redirect('dashboard')
+    
+    # Search and filter functionality
+    search_query = request.GET.get('search', '')
+    verification_filter = request.GET.get('verification', '')
+    
+    users = CustomUser.objects.filter(user_type='user')
+    
+    if search_query:
+        users = users.filter(
+            Q(full_name__icontains=search_query) | 
+            Q(phone_number__icontains=search_query)
+        )
+    
+    if verification_filter:
+        if verification_filter == 'verified':
+            users = users.filter(is_phone_verified=True)
+        elif verification_filter == 'unverified':
+            users = users.filter(is_phone_verified=False)
+    
+    users = users.order_by('-created_at')
+    
+    paginator = Paginator(users, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    percentage_verified = 0
+    if users.count() > 0:
+        percentage_verified = round((users.filter(is_phone_verified=True).count() * 100) / users.count(), 2)
+    context = {
+        'page_obj': page_obj,
+        'search_query': search_query,
+        'verification_filter': verification_filter,
+        'total_users': users.count(),
+        'verified_users': users.filter(is_phone_verified=True).count(),
+        "percentage_verified": percentage_verified,
+    }
+    
+    return render(request, 'admin/registered_users.html', context)
+
+# NEW: Print registered users as PDF
+@login_required
+def print_users_pdf(request):
+    """Generate PDF of registered users - Admin only"""
+    if not request.user.is_admin():
+        messages.error(request, 'ليس لديك صلاحية للوصول')
+        return redirect('dashboard')
+    
+    # Create the HttpResponse object with PDF headers
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="registered_users.pdf"'
+    
+    # Create the PDF object
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4)
+    
+    # Container for 'story' elements
+    story = []
+    
+    # Define styles
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=16,
+        spaceAfter=30,
+        alignment=1,  # Center alignment
+    )
+    
+    # Add title
+    title = Paragraph("قائمة المستخدمين المسجلين - النادي الثقافي لشباب لبير", title_style)
+    story.append(title)
+    story.append(Spacer(1, 12))
+    
+    # Get users data
+    users = CustomUser.objects.filter(user_type='user').order_by('full_name')
+    
+    # Create table data
+    data = [['#', 'الاسم الكامل', 'رقم الهاتف', 'تاريخ التسجيل', 'مؤكد']]
+    
+    for i, user in enumerate(users, 1):
+        data.append([
+            str(i),
+            user.full_name or 'غير محدد',
+            user.phone_number or 'غير محدد',
+            user.created_at.strftime('%Y-%m-%d'),
+            'نعم' if user.is_phone_verified else 'لا'
+        ])
+    
+    # Create table
+    table = Table(data)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 14),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+    
+    story.append(table)
+    
+    # Build PDF
+    doc.build(story)
+    
+    # Get the value of the BytesIO buffer and write it to the response
+    pdf = buffer.getvalue()
+    buffer.close()
+    response.write(pdf)
+    
+    return response
+
+# NEW: Teams management view
+@login_required
+def teams_view(request):
+    """View all registered teams - Public view"""
+    teams = Team.objects.filter(is_active=True).order_by('name')
+    
+    context = {
+        'teams': teams,
+        'can_manage_teams': request.user.is_admin(),
+    }
+    
+    return render(request, 'teams/teams_list.html', context)
+
+# NEW: Team management view for admins
+@login_required
+def team_management_view(request):
+    """Manage teams - Admin only"""
+    if not request.user.is_admin():
+        messages.error(request, 'ليس لديك صلاحية للوصول')
+        return redirect('dashboard')
+    
+    # Search and filter functionality
+    search_query = request.GET.get('search', '')
+    status_filter = request.GET.get('status', '')
+    
+    teams = Team.objects.all()
+    
+    if search_query:
+        teams = teams.filter(
+            Q(name__icontains=search_query) | 
+            Q(description__icontains=search_query)
+        )
+    
+    if status_filter:
+        if status_filter == 'active':
+            teams = teams.filter(is_active=True)
+        elif status_filter == 'inactive':
+            teams = teams.filter(is_active=False)
+    
+    teams = teams.order_by('-created_at')
+    
+    paginator = Paginator(teams, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'search_query': search_query,
+        'status_filter': status_filter,
+        'can_create_teams': request.user.can_create_polls(),  # Same permission as polls
+    }
+    
+    return render(request, 'admin/team_management.html', context)
+
+# NEW: Create team view
+@login_required
+def create_team_view(request):
+    """Create new team - Super Admin only"""
+    if not request.user.can_create_polls():
+        messages.error(request, 'ليس لديك صلاحية للوصول')
+        return redirect('team_management')
+    
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description', '')
+        contact_info = request.POST.get('contact_info', '')
+        image = request.FILES.get('image')
+        program_document = request.FILES.get('program_document')
+        
+        if not name:
+            messages.error(request, 'اسم الفريق مطلوب')
+            return render(request, 'admin/create_team.html')
+        
+        try:
+            team = Team.objects.create(
+                name=name,
+                description=description,
+                contact_info=contact_info,
+                image=image,
+                program_document=program_document,
+                created_by=request.user
+            )
+            
+            messages.success(request, 'تم إنشاء الفريق بنجاح!')
+            return redirect('team_management')
+        
+        except Exception as e:
+            messages.error(request, f'خطأ في إنشاء الفريق: {str(e)}')
+    
+    return render(request, 'admin/create_team.html')
+
+# NEW: Edit team view
+@login_required
+def edit_team_view(request, team_id):
+    """Edit team - Super Admin only"""
+    if not request.user.can_create_polls():
+        messages.error(request, 'ليس لديك صلاحية للوصول')
+        return redirect('team_management')
+    
+    team = get_object_or_404(Team, id=team_id)
+    
+    if request.method == 'POST':
+        team.name = request.POST.get('name', team.name)
+        team.description = request.POST.get('description', team.description)
+        team.contact_info = request.POST.get('contact_info', team.contact_info)
+        
+        # Handle file uploads
+        if request.FILES.get('image'):
+            team.image = request.FILES['image']
+        if request.FILES.get('program_document'):
+            team.program_document = request.FILES['program_document']
+        
+        # Handle status
+        team.is_active = request.POST.get('is_active') == 'on'
+        
+        try:
+            team.save()
+            messages.success(request, 'تم تحديث الفريق بنجاح!')
+            return redirect('team_management')
+        except Exception as e:
+            messages.error(request, f'خطأ في تحديث الفريق: {str(e)}')
+    
+    context = {'team': team}
+    return render(request, 'admin/edit_team.html', context)
+
+# NEW: Team detail view
+@login_required
+def team_detail_view(request, team_id):
+    """View team details"""
+    team = get_object_or_404(Team, id=team_id)
+    
+    context = {
+        'team': team,
+        'can_edit': request.user.can_create_polls(),
+    }
+    
+    return render(request, 'teams/team_detail.html', context)
 
 def verify_otp_view(request):
     """Verify OTP and complete registration"""
@@ -120,7 +410,10 @@ def verify_otp_view(request):
                 OTPLog.objects.filter(phone_number=phone_number, otp_code=otp_code).update(is_used=True)
                 
                 login(request, user)
-                del request.session['registration_phone']
+                
+                # FIXED: Use pop() instead of del to avoid KeyError
+                request.session.pop('registration_phone', None)
+                
                 messages.success(request, 'تم التسجيل بنجاح!')
                 return redirect('dashboard')
             else:
@@ -132,9 +425,13 @@ def verify_otp_view(request):
     
     return render(request, 'registration/verify_otp.html', {'phone_number': phone_number})
 
-
 def login_view(request):
     """User login with phone number/username and password"""
+    if request.user.is_authenticated:
+        if request.user.is_admin():
+            return redirect('admin_dashboard')
+        else:
+            return redirect('dashboard')
     if request.method == 'POST':
         login_identifier = request.POST.get('login_identifier')
         password = request.POST.get('password')
@@ -380,30 +677,34 @@ def admin_dashboard_view(request):
 
 @login_required
 def create_poll_view(request):
-    """Create new poll (Super Admin only)"""
+    """Create new poll (Super Admin only) - Team-based"""
     if not request.user.can_create_polls():
         messages.error(request, 'Access denied')
         return redirect('admin_dashboard')
+    
+    # Get available teams
+    available_teams = Team.objects.filter(is_active=True).order_by('name')
     
     if request.method == 'POST':
         title = request.POST.get('title')
         description = request.POST.get('description', '')
         start_time = request.POST.get('start_time')
         end_time = request.POST.get('end_time')
-        options = request.POST.getlist('options')
-        action = request.POST.get('action') # Get which button was clicked
+        poll_type = request.POST.get('poll_type', 'team')  # 'team' or 'custom'
+        action = request.POST.get('action')
         
         # Determine the status based on the button pressed
         if action == 'save_draft':
             poll_status = 'draft'
             success_message = 'Poll saved as draft successfully!'
-        else: # Default action is to schedule
+        else:
             poll_status = 'scheduled'
             success_message = 'Poll scheduled successfully!'
         
-        if not all([title, start_time, end_time]) or len(options) < 2:
-            messages.error(request, 'Title, start/end times, and at least 2 options are required')
-            return render(request, 'admin/create_poll.html')
+        if not all([title, start_time, end_time]):
+            messages.error(request, 'Title, start/end times are required')
+            context = {'available_teams': available_teams}
+            return render(request, 'admin/create_poll.html', context)
         
         try:
             # Create poll
@@ -413,26 +714,57 @@ def create_poll_view(request):
                 start_time=start_time,
                 end_time=end_time,
                 created_by=request.user,
-                 status=poll_status
+                status=poll_status
             )
             
-            # Create options
-            for i, option_text in enumerate(options):
-                if option_text.strip():
-                    Option.objects.create(
-                        poll=poll,
-                        option_text=option_text.strip(),
-                        order=i
-                    )
+            if poll_type == 'team':
+                # Create options based on selected teams
+                selected_teams = request.POST.getlist('selected_teams')
+                
+                if len(selected_teams) < 2:
+                    poll.delete()
+                    messages.error(request, 'يجب اختيار فريقين على الأقل للتصويت')
+                    context = {'available_teams': available_teams}
+                    return render(request, 'admin/create_poll.html', context)
+                
+                for i, team_id in enumerate(selected_teams):
+                    try:
+                        team = Team.objects.get(id=team_id, is_active=True)
+                        Option.objects.create(
+                            poll=poll,
+                            option_text=team.name,
+                            team=team,
+                            order=i
+                        )
+                    except Team.DoesNotExist:
+                        continue
             
-            messages.success(request, 'Poll created successfully!')
+            else:
+                # Create custom options (existing functionality)
+                options = request.POST.getlist('options')
+                
+                if len(options) < 2:
+                    poll.delete()
+                    messages.error(request, 'At least 2 options are required')
+                    context = {'available_teams': available_teams}
+                    return render(request, 'admin/create_poll.html', context)
+                
+                for i, option_text in enumerate(options):
+                    if option_text.strip():
+                        Option.objects.create(
+                            poll=poll,
+                            option_text=option_text.strip(),
+                            order=i
+                        )
+            
+            messages.success(request, success_message)
             return redirect('poll_management')
         
         except Exception as e:
             messages.error(request, f'Error creating poll: {str(e)}')
     
-    return render(request, 'admin/create_poll.html')
-
+    context = {'available_teams': available_teams}
+    return render(request, 'admin/create_poll.html', context)
 # views.py (add this new view in the Admin Views section)
 
 @login_required

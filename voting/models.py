@@ -65,6 +65,14 @@ class CustomUser(AbstractUser):
     # Override the id field to use UUID
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     
+    # NEW: Add full name field
+    full_name = models.CharField(
+        max_length=100, 
+        blank=True, 
+        null=True,
+        help_text="Full name of the user"
+    )
+    
     # Phone number field with validation
     phone_regex = RegexValidator(
         regex=r'^\+?1?\d{9,15}$', 
@@ -159,7 +167,8 @@ class CustomUser(AbstractUser):
     
     def __str__(self):
         if self.user_type == 'user' and self.phone_number:
-            return f"{self.phone_number} ({self.get_user_type_display()})"
+            display_name = self.full_name or self.phone_number
+            return f"{display_name} ({self.get_user_type_display()})"
         else:
             return f"{self.username} ({self.get_user_type_display()})"
     
@@ -182,12 +191,60 @@ class CustomUser(AbstractUser):
     def get_display_name(self):
         """Get display name for the user"""
         if self.user_type == 'user':
-            return self.phone_number or self.username
+            return self.full_name or self.phone_number or self.username
         else:
             return self.username or self.phone_number
 
 
-
+# NEW: Team model for election candidates
+class Team(models.Model):
+    """Teams/Candidates for elections"""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=200, help_text="Team/Candidate name")
+    description = models.TextField(blank=True, null=True, help_text="Brief description")
+    
+    # Team image/logo
+    image = models.ImageField(
+        upload_to='team_images/', 
+        blank=True, 
+        null=True,
+        help_text="Team logo or promotional image"
+    )
+    
+    # Election program document
+    program_document = models.FileField(
+        upload_to='team_programs/', 
+        blank=True, 
+        null=True,
+        help_text="PDF document with election program"
+    )
+    
+    # Contact information
+    contact_info = models.TextField(
+        blank=True, 
+        null=True,
+        help_text="Contact information for the team"
+    )
+    
+    # Status
+    is_active = models.BooleanField(default=True, help_text="Is this team currently active?")
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='created_teams')
+    
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Team'
+        verbose_name_plural = 'Teams'
+    
+    def __str__(self):
+        return self.name
+    
+    def get_vote_count(self):
+        """Get total votes for this team across all polls"""
+        return Vote.objects.filter(option__team=self).count()
 
 
 class Poll(models.Model):
@@ -244,6 +301,17 @@ class Option(models.Model):
     poll = models.ForeignKey(Poll, on_delete=models.CASCADE, related_name='options')
     option_text = models.CharField(max_length=200)
     order = models.PositiveIntegerField(default=0)
+    
+    # NEW: Link option to a team (optional)
+    team = models.ForeignKey(
+        Team, 
+        on_delete=models.CASCADE, 
+        blank=True, 
+        null=True,
+        related_name='options',
+        help_text="Team associated with this option"
+    )
+    
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
@@ -276,7 +344,8 @@ class Vote(models.Model):
         ordering = ['-voted_at']
     
     def __str__(self):
-        return f"{self.user.phone_number} voted for {self.option.option_text} in {self.poll.title}"
+        user_display = self.user.full_name or self.user.phone_number
+        return f"{user_display} voted for {self.option.option_text} in {self.poll.title}"
 
 
 class OTPLog(models.Model):

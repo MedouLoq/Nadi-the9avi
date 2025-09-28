@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+
+{% block title %}إدارة اللوائح{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">
+                    <i class="fas fa-users-cog me-2"></i>
+                    إدارة اللوائح
+                </h3>
+                {% if can_create_teams %}
+                <a href="{% url 'create_team' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>
+                    إضافة لائحة جديد
+                </a>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <!-- Search and Filters -->
+                <form method="get" class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <input type="text" 
+                               class="form-control" 
+                               name="search" 
+                               value="{{ search_query }}"
+                               placeholder="البحث باسم الفريق أو الوصف...">
+                    </div>
+                    <div class="col-md-4">
+                        <select name="status" class="form-select">
+                            <option value="">جميع اللوائح</option>
+                            <option value="active" {% if status_filter == 'active' %}selected{% endif %}>نشط</option>
+                            <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>غير نشط</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search"></i>
+                            بحث
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Teams Table -->
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>الصورة</th>
+                                <th>اسم الفريق</th>
+                                <th>الوصف</th>
+                                <th>تاريخ الإنشاء</th>
+                                <th>الحالة</th>
+                                <th>الأصوات</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for team in page_obj %}
+                            <tr>
+                                <td>
+                                    {% if team.image %}
+                                    <img src="{{ team.image.url }}" 
+                                         alt="{{ team.name }}" 
+                                         class="team-thumbnail">
+                                    {% else %}
+                                    <div class="team-thumbnail-placeholder">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong>{{ team.name }}</strong>
+                                </td>
+                                <td>
+                                    <span class="text-muted">
+                                        {{ team.description|truncatewords:10|default:"لا يوجد وصف" }}
+                                    </span>
+                                </td>
+                                <td>{{ team.created_at|date:"Y-m-d H:i" }}</td>
+                                <td>
+                                    {% if team.is_active %}
+                                        <span class="badge bg-success">نشط</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">غير نشط</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">{{ team.get_vote_count }}</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'team_detail' team.id %}" 
+                                           class="btn btn-sm btn-outline-primary" 
+                                           title="عرض">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        {% if can_create_teams %}
+                                        <a href="{% url 'edit_team' team.id %}" 
+                                           class="btn btn-sm btn-outline-warning" 
+                                           title="تعديل">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        {% endif %}
+                                        {% if team.program_document %}
+                                        <a href="{{ team.program_document.url }}" 
+                                           class="btn btn-sm btn-outline-success" 
+                                           title="تحميل البرنامج"
+                                           target="_blank">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted">
+                                    <i class="fas fa-users fa-3x mb-3"></i>
+                                    <p>لا توجد لوائح  مسجلة</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                <nav aria-label="pagination">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}&status={{ status_filter }}">
+                                    السابق
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}&search={{ search_query }}&status={{ status_filter }}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search_query }}&status={{ status_filter }}">
+                                    التالي
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.team-thumbnail {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.team-thumbnail-placeholder {
+    width: 50px;
+    height: 50px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+}
+</style>
+{% endblock %}

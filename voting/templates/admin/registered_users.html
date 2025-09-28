@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}لائحة الناخبين{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">
+                    <i class="fas fa-vote-yea me-2"></i>
+                    لائحة الناخبين
+                </h3>
+                <button id="printBtn" class="btn btn-success">
+                    <i class="fas fa-print me-2"></i>
+                    طباعة القائمة
+                </button>
+            </div>
+            <div class="card-body">
+                <!-- Statistics Row -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body text-center">
+                                <h4>{{ total_users }}</h4>
+                                <p class="mb-0">إجمالي الناخبين</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-success text-white">
+                            <div class="card-body text-center">
+                                <h4>{{ verified_users }}</h4>
+                                <p class="mb-0">ناخبون مؤكدون</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-warning text-white">
+                            <div class="card-body text-center">
+                                <h4>{{ unverified_users }}</h4>
+                                <p class="mb-0">في انتظار التأكيد</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search and Filters -->
+                <form method="get" class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <input type="text" 
+                               class="form-control" 
+                               name="search" 
+                               value="{{ search_query }}"
+                               placeholder="البحث بالاسم أو رقم الهاتف...">
+                    </div>
+                    <div class="col-md-4">
+                        <select name="verification" class="form-select">
+                            <option value="">جميع الناخبين</option>
+                            <option value="verified" {% if verification_filter == 'verified' %}selected{% endif %}>مؤكدون فقط</option>
+                            <option value="unverified" {% if verification_filter == 'unverified' %}selected{% endif %}>غير مؤكدين فقط</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search"></i>
+                            بحث
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Users Table -->
+                <div class="table-responsive" id="printableTable">
+                    <table class="table table-striped" id="usersTable">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>الاسم الكامل</th>
+                                <th>رقم الهاتف</th>
+                                <th>تاريخ التسجيل</th>
+                                <th>حالة التحقق</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in page_obj %}
+                            <tr>
+                                <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
+                                <td>
+                                    <strong>{{ user.full_name|default:"غير محدد" }}</strong>
+                                </td>
+                                <td>
+                                    <span class="text-monospace">{{ user.phone_number }}</span>
+                                </td>
+                                <td>{{ user.created_at|date:"Y-m-d H:i" }}</td>
+                                <td>
+                                    {% if user.is_phone_verified %}
+                                        <span class="badge bg-success">مؤكد</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">غير مؤكد</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    <i class="fas fa-users fa-3x mb-3"></i>
+                                    <p>لا توجد نتائج للبحث</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                <nav aria-label="pagination">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}&verification={{ verification_filter }}">
+                                    السابق
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}&search={{ search_query }}&verification={{ verification_filter }}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search_query }}&verification={{ verification_filter }}">
+                                    التالي
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    body * { visibility: hidden; }
+    .print-content, .print-content * { visibility: visible; }
+    .print-content {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+    .card-header .btn, form, .pagination { display: none !important; }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('printBtn').addEventListener('click', function() {
+    const currentDate = new Date().toLocaleDateString('ar-SA');
+    const tableHTML = document.getElementById('usersTable').outerHTML;
+    const logoUrl = "{% static 'club-logo.png' %}";
+    
+    const printContent = `
+    <!DOCTYPE html>
+    <html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8">
+        <title>لائحة الناخبين - النادي الثقافي لشباب لبير</title>
+        <style>
+            body { font-family: Arial, sans-serif; direction: rtl; text-align: right; }
+            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+            .logo-section { display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+            .logo { width: 80px; height: 80px; background: #2563eb; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-left: 15px; }
+            .logo img { width: 70px; height: 70px; object-fit: contain; border-radius: 50%; }
+            .title { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+            .subtitle { font-size: 18px; color: #666; }
+            .date { margin-top: 10px; font-size: 14px; color: #666; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+            th { background-color: #f2f2f2; font-weight: bold; }
+            .badge { padding: 3px 8px; border-radius: 4px; font-size: 12px; }
+            .bg-success { background-color: #28a745; color: white; }
+            .bg-warning { background-color: #ffc107; color: black; }
+            .bg-info { background-color: #17a2b8; color: white; }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <div class="logo-section">
+                <div class="logo">
+                    <img src="${window.location.origin}${logoUrl}" alt="شعار النادي" onerror="this.style.display='none'; this.parentNode.innerHTML='<span style=\\'color:white;font-weight:bold;\\'>شلب</span>';">
+                </div>
+                <div>
+                    <h1 class="title">النادي الثقافي لشباب لبير</h1>
+                    <h2 class="subtitle">لائحة الناخبين المسجلين</h2>
+                </div>
+            </div>
+            <div class="date">تاريخ الطباعة: ${currentDate}</div>
+        </div>
+        ${tableHTML}
+        <div style="margin-top: 40px; text-align: center; font-size: 12px; color: #666;">
+            النادي الثقافي لشباب لبير | نظام إدارة الانتخابات
+        </div>
+    </body>
+    </html>
+    `;
+    
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.onload = function() {
+        printWindow.print();
+        printWindow.close();
+    };
+});
+</script>
+{% endblock %}

@@ -55,7 +55,7 @@
                         </h5>
                     </div>
                     
-                    <div class="row mb-3">
+                    <div class="row mb-4">
                         <div class="col-md-6">
                             <label for="start_time" class="form-label">
                                 <i class="fas fa-play ms-2"></i>تاريخ ووقت البداية <span class="text-danger">*</span>
@@ -71,84 +71,119 @@
                             <div class="form-text">متى ينتهي التصويت</div>
                         </div>
                     </div>
-                    
-                    <!-- Poll Options -->
+
+                    <!-- Poll Type Selection -->
                     <div class="section-header mb-4">
                         <h5 class="section-title">
-                            <i class="fas fa-list ms-2 text-success"></i>
-                            خيارات التصويت
+                            <i class="fas fa-vote-yea ms-2 text-info"></i>
+                            نوع الاستطلاع
                         </h5>
                     </div>
-                    
-                    <div id="optionsContainer">
-                        <!-- Option 1 -->
-                        <div class="option-group mb-3">
-                            <label class="form-label">
-                                <i class="fas fa-check ms-2"></i>الخيار 1 <span class="text-danger">*</span>
-                            </label>
-                            <div class="input-group">
-                                <span class="input-group-text">1</span>
-                                <input type="text" class="form-control" name="options" placeholder="أدخل نص الخيار الأول" required>
+
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="poll_type" id="team_poll" value="team" checked>
+                                <label class="form-check-label" for="team_poll">
+                                    <i class="fas fa-users me-2"></i>
+                                    تصويت بين اللوائح
+                                </label>
                             </div>
-                        </div>
-                        
-                        <!-- Option 2 -->
-                        <div class="option-group mb-3">
-                            <label class="form-label">
-                                <i class="fas fa-check ms-2"></i>الخيار 2 <span class="text-danger">*</span>
-                            </label>
-                            <div class="input-group">
-                                <span class="input-group-text">2</span>
-                                <input type="text" class="form-control" name="options" placeholder="أدخل نص الخيار الثاني" required>
-                            </div>
-                        </div>
-                        
-                        <!-- Option 3 (Initially hidden) -->
-                        <div class="option-group mb-3" style="display: none;">
-                            <label class="form-label">
-                                <i class="fas fa-check ms-2"></i>الخيار 3
-                            </label>
-                            <div class="input-group">
-                                <span class="input-group-text">3</span>
-                                <input type="text" class="form-control" name="options" placeholder="أدخل نص الخيار الثالث">
-                                <button class="btn btn-outline-danger" type="button" onclick="removeOption(this)">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- Option 4 (Initially hidden) -->
-                        <div class="option-group mb-3" style="display: none;">
-                            <label class="form-label">
-                                <i class="fas fa-check ms-2"></i>الخيار 4
-                            </label>
-                            <div class="input-group">
-                                <span class="input-group-text">4</span>
-                                <input type="text" class="form-control" name="options" placeholder="أدخل نص الخيار الرابع">
-                                <button class="btn btn-outline-danger" type="button" onclick="removeOption(this)">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- Option 5 (Initially hidden) -->
-                        <div class="option-group mb-3" style="display: none;">
-                            <label class="form-label">
-                                <i class="fas fa-check ms-2"></i>الخيار 5
-                            </label>
-                            <div class="input-group">
-                                <span class="input-group-text">5</span>
-                                <input type="text" class="form-control" name="options" placeholder="أدخل نص الخيار الخامس">
-                                <button class="btn btn-outline-danger" type="button" onclick="removeOption(this)">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="poll_type" id="custom_poll" value="custom">
+                                <label class="form-check-label" for="custom_poll">
+                                    <i class="fas fa-list me-2"></i>
+                                    خيارات مخصصة
+                                </label>
                             </div>
                         </div>
                     </div>
                     
-                    <button type="button" class="btn btn-outline-primary mb-4" id="addOptionBtn" onclick="addOption()">
-                        <i class="fas fa-plus ms-2"></i>إضافة خيار
-                    </button>
+                    <!-- Team Selection (for team polls) -->
+                    <div id="teamSection" class="section-header mb-4">
+                        <h5 class="section-title">
+                            <i class="fas fa-users ms-2 text-success"></i>
+                            اختيار اللوائح للتصويت
+                        </h5>
+                        
+                        {% if available_teams %}
+                        <div class="row mt-3">
+                            {% for team in available_teams %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card team-card">
+                                    <div class="card-body">
+                                        <div class="form-check">
+                                            <input class="form-check-input team-checkbox" type="checkbox" 
+                                                   name="selected_teams" value="{{ team.id }}" id="team_{{ team.id }}">
+                                            <label class="form-check-label w-100" for="team_{{ team.id }}">
+                                                <div class="d-flex align-items-center">
+                                                    {% if team.image %}
+                                                    <img src="{{ team.image.url }}" class="team-thumb me-3" alt="{{ team.name }}">
+                                                    {% else %}
+                                                    <div class="team-thumb-placeholder me-3">
+                                                        <i class="fas fa-users"></i>
+                                                    </div>
+                                                    {% endif %}
+                                                    <div>
+                                                        <h6 class="mb-1">{{ team.name }}</h6>
+                                                        <small class="text-muted">{{ team.description|truncatewords:10|default:"" }}</small>
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            اختر فريقين على الأقل للمشاركة في التصويت
+                        </div>
+                        {% else %}
+                        <div class="alert alert-warning mt-3">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            لا توجد لوائح  نشطة متاحة. يجب <a href="{% url 'create_team' %}" class="alert-link">إنشاء لوائح </a> أولاً قبل إنشاء استطلاع بين اللوائح.
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Custom Options (for custom polls) -->
+                    <div id="customSection" class="section-header mb-4" style="display: none;">
+                        <h5 class="section-title">
+                            <i class="fas fa-list ms-2 text-success"></i>
+                            خيارات التصويت المخصصة
+                        </h5>
+                        
+                        <div id="optionsContainer" class="mt-3">
+                            <!-- Option 1 -->
+                            <div class="option-group mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-check ms-2"></i>الخيار 1 <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">1</span>
+                                    <input type="text" class="form-control" name="options" placeholder="أدخل نص الخيار الأول">
+                                </div>
+                            </div>
+                            
+                            <!-- Option 2 -->
+                            <div class="option-group mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-check ms-2"></i>الخيار 2 <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">2</span>
+                                    <input type="text" class="form-control" name="options" placeholder="أدخل نص الخيار الثاني">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="button" class="btn btn-outline-primary" id="addOptionBtn" onclick="addOption()">
+                            <i class="fas fa-plus ms-2"></i>إضافة خيار
+                        </button>
+                    </div>
                     
                     <!-- Poll Preview -->
                     <div class="card poll-preview mb-4">
@@ -174,26 +209,25 @@
                     
                     <!-- Submit Buttons -->
                     <div class="row">
-    <div class="col-md-4 mb-2">
-        <button type="submit" name="action" value="schedule_poll" class="btn btn-primary btn-lg w-100">
-            <i class="fas fa-check ms-2"></i>
-            جدولة الاستطلاع
-        </button>
-    </div>
-    <!-- ADD THIS NEW BUTTON -->
-    <div class="col-md-4 mb-2">
-        <button type="submit" name="action" value="save_draft" class="btn btn-info btn-lg w-100">
-            <i class="fas fa-save ms-2"></i>
-            حفظ كمسودة
-        </button>
-    </div>
-    <div class="col-md-4">
-        <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary btn-lg w-100">
-            <i class="fas fa-times ms-2"></i>
-            إلغاء
-        </a>
-    </div>
-</div>
+                        <div class="col-md-4 mb-2">
+                            <button type="submit" name="action" value="schedule_poll" class="btn btn-primary btn-lg w-100">
+                                <i class="fas fa-check ms-2"></i>
+                                جدولة الاستطلاع
+                            </button>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <button type="submit" name="action" value="save_draft" class="btn btn-info btn-lg w-100">
+                                <i class="fas fa-save ms-2"></i>
+                                حفظ كمسودة
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="fas fa-times ms-2"></i>
+                                إلغاء
+                            </a>
+                        </div>
+                    </div>
                 </form>
             </div>
         </div>
@@ -212,28 +246,38 @@
         margin-bottom: 0;
     }
 
-    .option-group {
+    .team-card {
         transition: all 0.3s ease;
+        border: 2px solid transparent;
+        cursor: pointer;
     }
 
-    .option-group.removing {
-        opacity: 0;
-        transform: translateX(-20px);
+    .team-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
-    
-    .option-group.slide-up {
-        animation: slideUp 0.3s ease;
+
+    .team-card.selected {
+        border-color: var(--primary-blue);
+        background-color: rgba(37, 99, 235, 0.05);
     }
-    
-    @keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+
+    .team-thumb {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .team-thumb-placeholder {
+        width: 50px;
+        height: 50px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
     }
 
     .poll-preview {
@@ -246,21 +290,13 @@
         background: rgba(37, 99, 235, 0.05) !important;
     }
 
-    .input-group-text {
-        background: var(--primary-blue);
-        color: white;
+    .form-check-input:checked ~ .form-check-label .team-card {
         border-color: var(--primary-blue);
-        font-weight: 600;
+        background-color: rgba(37, 99, 235, 0.05);
     }
 
-    .btn-outline-danger {
-        border-radius: 0 0.375rem 0.375rem 0;
-    }
-
-    @media (max-width: 768px) {
-        .col-md-6 .btn {
-            margin-bottom: 0.5rem;
-        }
+    .option-group {
+        transition: all 0.3s ease;
     }
 </style>
 {% endblock %}
@@ -270,48 +306,111 @@
     let optionCount = 2;
     const maxOptions = 5;
 
-    // Add new option
+    // Toggle between team and custom poll types
+    document.addEventListener('DOMContentLoaded', function() {
+        const teamRadio = document.getElementById('team_poll');
+        const customRadio = document.getElementById('custom_poll');
+        const teamSection = document.getElementById('teamSection');
+        const customSection = document.getElementById('customSection');
+
+        function togglePollType() {
+            if (teamRadio.checked) {
+                teamSection.style.display = 'block';
+                customSection.style.display = 'none';
+            } else {
+                teamSection.style.display = 'none';
+                customSection.style.display = 'block';
+            }
+            updatePreview();
+        }
+
+        teamRadio.addEventListener('change', togglePollType);
+        customRadio.addEventListener('change', togglePollType);
+
+        // Team selection handling
+        document.querySelectorAll('.team-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const card = this.closest('.team-card');
+                if (this.checked) {
+                    card.classList.add('selected');
+                } else {
+                    card.classList.remove('selected');
+                }
+                updatePreview();
+            });
+        });
+
+        // Initialize preview
+        updatePreview();
+        
+        // Set minimum start time to current time
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById('start_time').min = now.toISOString().slice(0, 16);
+        
+        // Event listeners for preview updates
+        document.getElementById('title').addEventListener('input', updatePreview);
+        document.getElementById('description').addEventListener('input', updatePreview);
+        document.getElementById('start_time').addEventListener('change', updatePreview);
+        document.getElementById('end_time').addEventListener('change', updatePreview);
+    });
+
+    // Add custom option
     function addOption() {
         if (optionCount >= maxOptions) {
             alert('يمكنك إضافة 5 خيارات كحد أقصى');
             return;
         }
 
-        const optionGroups = document.querySelectorAll('.option-group');
-        const nextOption = optionGroups[optionCount];
+        optionCount++;
+        const optionsContainer = document.getElementById('optionsContainer');
+        const newOption = document.createElement('div');
+        newOption.className = 'option-group mb-3';
+        newOption.innerHTML = `
+            <label class="form-label">
+                <i class="fas fa-check ms-2"></i>الخيار ${optionCount}
+            </label>
+            <div class="input-group">
+                <span class="input-group-text">${optionCount}</span>
+                <input type="text" class="form-control" name="options" placeholder="أدخل نص الخيار ${optionCount}">
+                <button class="btn btn-outline-danger" type="button" onclick="removeOption(this)">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
         
-        if (nextOption) {
-            nextOption.style.display = 'block';
-            nextOption.classList.add('slide-up');
-            optionCount++;
-            
-            // Hide add button if max reached
-            if (optionCount >= maxOptions) {
-                document.getElementById('addOptionBtn').style.display = 'none';
-            }
-            
-            updatePreview();
+        optionsContainer.appendChild(newOption);
+        
+        // Add event listener for preview update
+        newOption.querySelector('input').addEventListener('input', updatePreview);
+        
+        if (optionCount >= maxOptions) {
+            document.getElementById('addOptionBtn').style.display = 'none';
         }
+        
+        updatePreview();
     }
 
-    // Remove option
+    // Remove custom option
     function removeOption(button) {
         const optionGroup = button.closest('.option-group');
-        optionGroup.classList.add('removing');
+        optionGroup.remove();
+        optionCount--;
         
-        setTimeout(() => {
-            optionGroup.style.display = 'none';
-            optionGroup.classList.remove('removing');
-            optionGroup.querySelector('input').value = '';
-            optionCount--;
-            
-            // Show add button if under max
-            if (optionCount < maxOptions) {
-                document.getElementById('addOptionBtn').style.display = 'block';
-            }
-            
-            updatePreview();
-        }, 300);
+        // Renumber remaining options
+        const remainingOptions = document.querySelectorAll('#optionsContainer .option-group');
+        remainingOptions.forEach((option, index) => {
+            const number = index + 1;
+            option.querySelector('.form-label').innerHTML = `<i class="fas fa-check ms-2"></i>الخيار ${number}`;
+            option.querySelector('.input-group-text').textContent = number;
+            option.querySelector('input').placeholder = `أدخل نص الخيار ${number}`;
+        });
+        
+        if (optionCount < maxOptions) {
+            document.getElementById('addOptionBtn').style.display = 'block';
+        }
+        
+        updatePreview();
     }
 
     // Update preview
@@ -320,25 +419,39 @@
         const description = document.getElementById('description').value || 'وصف الاستطلاع سيظهر هنا';
         const startTime = document.getElementById('start_time').value;
         const endTime = document.getElementById('end_time').value;
+        const pollType = document.querySelector('input[name="poll_type"]:checked').value;
         
         document.getElementById('previewTitle').textContent = title;
         document.getElementById('previewDescription').textContent = description;
         
         // Update options preview
         const optionsContainer = document.getElementById('previewOptions');
-        const optionInputs = document.querySelectorAll('input[name="options"]');
         let optionsHTML = '';
         
-        optionInputs.forEach((input, index) => {
-            if (input.value.trim() && input.closest('.option-group').style.display !== 'none') {
+        if (pollType === 'team') {
+            const selectedTeams = document.querySelectorAll('.team-checkbox:checked');
+            selectedTeams.forEach((checkbox, index) => {
+                const label = checkbox.nextElementSibling.querySelector('h6').textContent;
                 optionsHTML += `
                     <div class="form-check mb-2">
                         <input class="form-check-input" type="radio" disabled>
-                        <label class="form-check-label">${input.value}</label>
+                        <label class="form-check-label">${label}</label>
                     </div>
                 `;
-            }
-        });
+            });
+        } else {
+            const optionInputs = document.querySelectorAll('#customSection input[name="options"]');
+            optionInputs.forEach((input, index) => {
+                if (input.value.trim()) {
+                    optionsHTML += `
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" disabled>
+                            <label class="form-check-label">${input.value}</label>
+                        </div>
+                    `;
+                }
+            });
+        }
         
         if (optionsHTML) {
             optionsContainer.innerHTML = optionsHTML;
@@ -356,119 +469,46 @@
         }
     }
 
-    // Real-time preview updates
-    document.addEventListener('DOMContentLoaded', function() {
-        // Set minimum start time to current time
-        const now = new Date();
-        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-        document.getElementById('start_time').min = now.toISOString().slice(0, 16);
-        
-        // Update preview on input changes
-        document.getElementById('title').addEventListener('input', updatePreview);
-        document.getElementById('description').addEventListener('input', updatePreview);
-        document.getElementById('start_time').addEventListener('change', updatePreview);
-        document.getElementById('end_time').addEventListener('change', updatePreview);
-        
-        // Update preview for option inputs
-        document.querySelectorAll('input[name="options"]').forEach(input => {
-            input.addEventListener('input', updatePreview);
-        });
-        
-        // Validate end time is after start time
-        document.getElementById('end_time').addEventListener('change', function() {
-            const startTime = document.getElementById('start_time').value;
-            const endTime = this.value;
-            
-            if (startTime && endTime && endTime <= startTime) {
-                alert('وقت النهاية يجب أن يكون بعد وقت البداية');
-                this.value = '';
-                updatePreview();
-            }
-        });
-        
-        // Update start time validation when changed
-        document.getElementById('start_time').addEventListener('change', function() {
-            const endTime = document.getElementById('end_time');
-            if (endTime.value && endTime.value <= this.value) {
-                alert('وقت النهاية يجب أن يكون بعد وقت البداية');
-                endTime.value = '';
-                updatePreview();
-            }
-        });
-    });
-
     // Form validation
     document.getElementById('createPollForm').addEventListener('submit', function(e) {
         const title = document.getElementById('title').value.trim();
         const startTime = document.getElementById('start_time').value;
         const endTime = document.getElementById('end_time').value;
+        const pollType = document.querySelector('input[name="poll_type"]:checked').value;
         
-        // Check required fields
-        if (!title) {
+        // Basic validation
+        if (!title || !startTime || !endTime) {
             e.preventDefault();
-            alert('عنوان الاستطلاع مطلوب');
-            document.getElementById('title').focus();
+            alert('عنوان الاستطلاع وتوقيت البداية والنهاية مطلوبة');
             return false;
         }
         
-        if (!startTime || !endTime) {
-            e.preventDefault();
-            alert('تاريخ ووقت البداية والنهاية مطلوبان');
-            return false;
-        }
-        
-        // Check if end time is after start time
         if (endTime <= startTime) {
             e.preventDefault();
             alert('وقت النهاية يجب أن يكون بعد وقت البداية');
             return false;
         }
         
-        // Check if we have at least 2 valid options
-        const filledOptions = Array.from(document.querySelectorAll('input[name="options"]'))
-            .filter(input => {
-                const optionGroup = input.closest('.option-group');
-                return input.value.trim() && (optionGroup.style.display !== 'none');
-            });
-        
-        if (filledOptions.length < 2) {
-            e.preventDefault();
-            alert('يجب إضافة خيارين على الأقل للاستطلاع');
-            return false;
-        }
-        
-        // Check for duplicate options
-        const optionValues = filledOptions.map(input => input.value.trim().toLowerCase());
-        const uniqueOptions = [...new Set(optionValues)];
-        
-        if (optionValues.length !== uniqueOptions.length) {
-            e.preventDefault();
-            alert('لا يمكن أن تكون الخيارات متشابهة');
-            return false;
-        }
-        
-        // All validations passed
-        console.log('Form is valid, submitting...');
-    });
-
-    // Character counter for title
-    document.getElementById('title').addEventListener('input', function() {
-        const remaining = 200 - this.value.length;
-        const formText = this.nextElementSibling;
-        
-        if (remaining < 20) {
-            formText.textContent = `متبقي ${remaining} حرف`;
-            formText.style.color = remaining < 10 ? '#ef4444' : '#f59e0b';
+        // Poll type specific validation
+        if (pollType === 'team') {
+            const selectedTeams = document.querySelectorAll('.team-checkbox:checked');
+            if (selectedTeams.length < 2) {
+                e.preventDefault();
+                alert('يجب اختيار فريقين على الأقل للتصويت');
+                return false;
+            }
         } else {
-            formText.textContent = 'عنوان واضح ومختصر للاستطلاع';
-            formText.style.color = '';
+            const filledOptions = Array.from(document.querySelectorAll('#customSection input[name="options"]'))
+                .filter(input => input.value.trim());
+            
+            if (filledOptions.length < 2) {
+                e.preventDefault();
+                alert('يجب إضافة خيارين على الأقل للاستطلاع');
+                return false;
+            }
         }
-    });
-
-    // Auto-resize description textarea
-    document.getElementById('description').addEventListener('input', function() {
-        this.style.height = 'auto';
-        this.style.height = this.scrollHeight + 'px';
+        
+        return true;
     });
 </script>
 {% endblock %}

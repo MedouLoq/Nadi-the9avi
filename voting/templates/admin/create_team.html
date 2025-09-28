@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block title %}إضافة لائحة جديد{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">
+                    <i class="fas fa-plus me-2"></i>
+                    إضافة لائحة جديد
+                </h3>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <!-- Team Name -->
+                    <div class="mb-3">
+                        <label for="name" class="form-label">
+                            <i class="fas fa-users me-2"></i>
+                            اسم الفريق <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="name" 
+                               name="name"
+                               placeholder="أدخل اسم الفريق"
+                               required>
+                    </div>
+                    
+                    <!-- Description -->
+                    <div class="mb-3">
+                        <label for="description" class="form-label">
+                            <i class="fas fa-info-circle me-2"></i>
+                            الوصف
+                        </label>
+                        <textarea class="form-control" 
+                                  id="description" 
+                                  name="description"
+                                  rows="4"
+                                  placeholder="وصف مختصر عن الفريق ومبادئه"></textarea>
+                    </div>
+                    
+                    <!-- Contact Information -->
+                    <div class="mb-3">
+                        <label for="contact_info" class="form-label">
+                            <i class="fas fa-phone me-2"></i>
+                            معلومات التواصل
+                        </label>
+                        <textarea class="form-control" 
+                                  id="contact_info" 
+                                  name="contact_info"
+                                  rows="3"
+                                  placeholder="معلومات التواصل مع الفريق (هاتف، إيميل، إلخ)"></textarea>
+                    </div>
+                    
+                    <!-- Team Image -->
+                    <div class="mb-3">
+                        <label for="image" class="form-label">
+                            <i class="fas fa-image me-2"></i>
+                            صورة الفريق / الشعار
+                        </label>
+                        <input type="file" 
+                               class="form-control" 
+                               id="image" 
+                               name="image"
+                               accept="image/*">
+                        <small class="form-text text-muted">
+                            يفضل رفع صورة بجودة عالية (PNG, JPG) - الحد الأقصى 5MB
+                        </small>
+                    </div>
+                    
+                    <!-- Program Document -->
+                    <div class="mb-4">
+                        <label for="program_document" class="form-label">
+                            <i class="fas fa-file-pdf me-2"></i>
+                            البرنامج الانتخابي
+                        </label>
+                        <input type="file" 
+                               class="form-control" 
+                               id="program_document" 
+                               name="program_document"
+                               accept=".pdf,.doc,.docx">
+                        <small class="form-text text-muted">
+                            رفع البرنامج الانتخابي للفريق (PDF, DOC, DOCX) - الحد الأقصى 10MB
+                        </small>
+                    </div>
+                    
+                    <!-- Buttons -->
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'team_management' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-right me-2"></i>
+                            إلغاء
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>
+                            حفظ الفريق
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Preview image upload
+    const imageInput = document.getElementById('image');
+    imageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            // Check file size (5MB limit)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('حجم الصورة كبير جداً. يرجى اختيار صورة أصغر من 5MB');
+                e.target.value = '';
+                return;
+            }
+            
+            // Show preview if needed
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // You can add image preview functionality here
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    // Check document file size
+    const docInput = document.getElementById('program_document');
+    docInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            // Check file size (10MB limit)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('حجم الملف كبير جداً. يرجى اختيار ملف أصغر من 10MB');
+                e.target.value = '';
+                return;
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
