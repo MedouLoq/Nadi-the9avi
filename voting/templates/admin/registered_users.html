@@ -20,31 +20,37 @@
             </div>
             <div class="card-body">
                 <!-- Statistics Row -->
-                
-                <!-- Search and Filters -->
-                <form method="get" class="row g-3 mb-4 no-print">
-                    <div class="col-md-6">
-                        <input type="text" 
-                               class="form-control" 
-                               name="search" 
-                               value="{{ search_query }}"
-                               placeholder="البحث بالاسم أو رقم الهاتف...">
-                    </div>
-                    <div class="col-md-4">
-                        <select name="verification" class="form-select">
-                            <option value="">جميع الناخبين</option>
-                            <option value="verified" {% if verification_filter == 'verified' %}selected{% endif %}>مؤكدون فقط</option>
-                            <option value="unverified" {% if verification_filter == 'unverified' %}selected{% endif %}>غير مؤكدين فقط</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-search"></i>
-                            بحث
-                        </button>
-                    </div>
-                </form>
 
+                <!-- Search and Filters -->
+               <!-- Search and Filters -->
+<form method="get" class="row g-3 mb-4 no-print">
+    <div class="col-md-{% if is_super_admin %}6{% else %}10{% endif %}">
+        <input type="text"
+               class="form-control"
+               name="search"
+               value="{{ search_query }}"
+               placeholder="البحث بالاسم أو رقم الهاتف...">
+    </div>
+
+    {% if is_super_admin %}
+    <div class="col-md-4">
+        <select name="verification" class="form-select">
+            <option value="">جميع الناخبين</option>
+            <option value="verified" {% if verification_filter == 'verified' %}selected{% endif %}>مؤكدون فقط</option>
+            <option value="unverified" {% if verification_filter == 'unverified' %}selected{% endif %}>غير مؤكدين فقط</option>
+        </select>
+    </div>
+    {% else %}
+    <input type="hidden" name="verification" value="verified">
+    {% endif %}
+
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">
+            <i class="fas fa-search"></i>
+            بحث
+        </button>
+    </div>
+</form>
                 <!-- Print Header (hidden on screen) -->
                 <div class="print-only print-header">
                     <div class="print-logo-section">
@@ -58,40 +64,67 @@
                 </div>
 
                 <!-- Users Table -->
-                <div class="table-responsive">
-                    <table class="table table-striped" id="usersTable">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>#</th>
-                                <th>الاسم الكامل</th>
-                                <th>رقم الهاتف</th>
-                                <th>تاريخ التسجيل</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for user in page_obj %}
-                            <tr>
-                                <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
-                                <td>
-                                    <strong>{{ user.full_name|default:"غير محدد" }}</strong>
-                                </td>
-                                <td>
-                                    <span class="text-monospace">{{ user.phone_number }}</span>
-                                </td>
-                                <td>{{ user.created_at|date:"Y-m-d H:i" }}</td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="4" class="text-center text-muted py-4">
-                                    <i class="fas fa-users fa-3x mb-3"></i>
-                                    <p>لا توجد نتائج للبحث</p>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+              <!-- Users Table -->
+<div class="table-responsive">
+    <!-- Screen view table (paginated) -->
+    <table class="table table-striped screen-only" id="usersTable">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>الاسم الكامل</th>
+                <th>رقم الهاتف</th>
+                <th>تاريخ التسجيل</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in page_obj %}
+            <tr>
+                <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
+                <td>
+                    <strong>{{ user.full_name|default:"غير محدد" }}</strong>
+                </td>
+                <td>
+                    <span class="text-monospace">{{ user.phone_number }}</span>
+                </td>
+                <td>{{ user.created_at|date:"Y-m-d H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center text-muted py-4">
+                    <i class="fas fa-users fa-3x mb-3"></i>
+                    <p>لا توجد نتائج للبحث</p>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
+    <!-- Print view table (all users, no pagination) -->
+    <table class="table table-striped print-only" id="printUsersTable">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>الاسم الكامل</th>
+                <th>رقم الهاتف</th>
+                <th>تاريخ التسجيل</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in all_users %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>
+                    <strong>{{ user.full_name|default:"غير محدد" }}</strong>
+                </td>
+                <td>
+                    <span class="text-monospace">{{ user.phone_number }}</span>
+                </td>
+                <td>{{ user.created_at|date:"Y-m-d H:i" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
                 <!-- Pagination -->
                 {% if page_obj.has_other_pages %}
                 <nav aria-label="pagination" class="no-print">
@@ -103,7 +136,7 @@
                                 </a>
                             </li>
                         {% endif %}
-                        
+
                         {% for num in page_obj.paginator.page_range %}
                             {% if page_obj.number == num %}
                                 <li class="page-item active">
@@ -115,7 +148,7 @@
                                 </li>
                             {% endif %}
                         {% endfor %}
-                        
+
                         {% if page_obj.has_next %}
                             <li class="page-item">
                                 <a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search_query }}&verification={{ verification_filter }}">
@@ -151,19 +184,27 @@
     .print-only {
         display: none !important;
     }
+    .screen-only {
+        display: table !important;
+    }
 }
 
-/* Print styles - Clean and simple like poll results */
+/* Print styles */
+/* Print styles */
 @media print {
-    /* Hide screen elements */
-    .no-print, 
-    nav, 
-    footer, 
-    .btn, 
+    .screen-only,
+    .no-print,
+    nav,
+    footer,
+    .btn,
     button,
     .card-header .btn,
     .pagination {
         display: none !important;
+    }
+
+    .print-only {
+        display: block !important;
     }
 
     /* Reset page layout */
@@ -191,7 +232,7 @@
     }
 
     .card-body {
-        padding: 0 !important;
+        padding: 0 20pt !important;  /* Add some padding for better margins */
     }
 
     /* Print header */
@@ -238,15 +279,23 @@
         margin: 0;
     }
 
-    /* Table styles */
+    /* Table styles - ADD THIS */
     .table-responsive {
         overflow: visible !important;
+        display: block !important;
+        width: 100% !important;
+        margin: 0 auto !important;  /* Center the container */
+    }
+
+    #printUsersTable {
+        display: table !important;  /* Ensure it displays as table */
+        margin: 15pt auto 0 auto !important;  /* Center the table */
+        width: 100% !important;
     }
 
     table {
         width: 100% !important;
         border-collapse: collapse !important;
-        margin-top: 15pt;
         font-size: 11pt;
     }
 
@@ -274,27 +323,6 @@
         -webkit-print-color-adjust: exact;
         color-adjust: exact;
         print-color-adjust: exact;
-    }
-
-    /* Badge styles for print */
-    .badge {
-        padding: 3pt 6pt !important;
-        border-radius: 4pt !important;
-        font-size: 10pt !important;
-        font-weight: bold !important;
-        -webkit-print-color-adjust: exact;
-        color-adjust: exact;
-        print-color-adjust: exact;
-    }
-
-    .bg-success {
-        background-color: #28a745 !important;
-        color: white !important;
-    }
-
-    .bg-warning {
-        background-color: #ffc107 !important;
-        color: black !important;
     }
 
     /* Print footer */
@@ -327,11 +355,6 @@
     /* Prevent page breaks in table rows */
     tr {
         page-break-inside: avoid;
-    }
-
-    /* Show print elements */
-    .print-only {
-        display: block !important;
     }
 }
 </style>

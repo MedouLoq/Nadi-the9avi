@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block title %}إعادة إرسال رمز التحقق{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center" dir="rtl">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-lg fade-in">
+            <div class="card-header text-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-mobile-alt me-2"></i>
+                    تأكيد رقم الهاتف
+                </h4>
+                <p class="mb-0 mt-2 text-white-50">هل نسيت التأكيد في المرة الأولى؟</p>
+            </div>
+            <div class="card-body">
+                <!-- Info Alert -->
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>هل لم تكمل التسجيل؟</strong>
+                    <p class="mb-0 mt-2">إذا قمت بالتسجيل ولكن لم تؤكد رقم هاتفك، يمكنك إعادة المحاولة الآن</p>
+                </div>
+                
+                <form method="post" id="resendForm">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="phone_number" class="form-label">
+                            <i class="fas fa-phone me-2"></i>رقم الهاتف المسجل
+                        </label>
+                        <div class="input-group">
+                            <input type="tel" class="form-control" id="phone_number" name="phone_number" 
+                                   placeholder="44800028" required
+                                   pattern="^[234]\d{7}$"
+                                   maxlength="8"
+                                   title="أدخل 8 أرقام تبدأ بـ 2 أو 3 أو 4">
+                            <span class="input-group-text bg-primary text-white">+222</span>
+                        </div>
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            أدخل رقم الهاتف الذي سجلت به سابقاً
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 mb-3">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-paper-plane me-2"></i>
+                            إرسال رمز التحقق
+                        </button>
+                    </div>
+                </form>
+                
+                <hr class="my-4">
+                
+                <div class="text-center">
+                    <p class="mb-2">تريد تسجيل حساب جديد؟</p>
+                    <a href="{% url 'register' %}" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-user-plus me-2"></i>
+                        تسجيل جديد
+                    </a>
+                    <a href="{% url 'login' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-sign-in-alt me-2"></i>
+                        تسجيل الدخول
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Help Card -->
+        <div class="card mt-4 border-0" style="background: rgba(255, 255, 255, 0.7);">
+            <div class="card-body text-center">
+                <h6 class="card-title text-primary">
+                    <i class="fas fa-question-circle me-2"></i>
+                    هل تحتاج مساعدة؟
+                </h6>
+                <p class="card-text small text-muted mb-0">
+                    إذا كنت تواجه مشكلة في استلام رمز التحقق، تأكد من أن رقم هاتفك صحيح وأن شبكتك تعمل بشكل جيد.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .fade-in {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Phone number validation
+    document.getElementById('phone_number').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        
+        if (value.length > 8) {
+            value = value.substring(0, 8);
+        }
+        
+        e.target.value = value;
+        
+        if (value.length === 8 && ['2', '3', '4'].includes(value[0])) {
+            e.target.classList.remove('is-invalid');
+            e.target.classList.add('is-valid');
+        } else {
+            e.target.classList.remove('is-valid');
+            if (value.length > 0) {
+                e.target.classList.add('is-invalid');
+            }
+        }
+    });
+
+    // Form validation
+    document.getElementById('resendForm').addEventListener('submit', function(e) {
+        const phoneInput = document.getElementById('phone_number');
+        const phoneValue = phoneInput.value;
+        
+        if (phoneValue.length !== 8 || !['2', '3', '4'].includes(phoneValue[0])) {
+            e.preventDefault();
+            phoneInput.classList.add('is-invalid');
+            phoneInput.focus();
+            
+            let errorDiv = document.querySelector('.phone-error');
+            if (!errorDiv) {
+                errorDiv = document.createElement('div');
+                errorDiv.className = 'invalid-feedback phone-error';
+                errorDiv.textContent = 'الرجاء إدخال رقم هاتف موريتاني صحيح من 8 أرقام يبدأ بـ 2 أو 3 أو 4';
+                phoneInput.parentNode.appendChild(errorDiv);
+            }
+            return false;
+        }
+    });
+</script>
+{% endblock %}

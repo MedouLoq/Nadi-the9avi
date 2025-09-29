@@ -5,17 +5,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}منصة التصويت{% endblock %}</title>
-    
+
     <!-- Bootstrap 5 RTL CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.rtl.min.css" rel="stylesheet">
-    
+
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
+
     <!-- Arabic Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@200;300;400;500;700;800;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
+
     <style>
         .navbar-brand {
     display: flex;
@@ -51,7 +51,7 @@
         width: 45px;
         height: 45px;
     }
-    
+
     .club-name {
         font-size: 1.1rem;
     }
@@ -64,7 +64,7 @@
         height: 40px;
         margin-left: 8px;
     }
-    
+
     .club-name {
         font-size: 1rem;
     }
@@ -77,7 +77,7 @@
         height: 35px;
         margin-left: 6px;
     }
-    
+
     .club-name {
         font-size: 0.9rem;
         /* Allow text to wrap on very small screens */
@@ -91,7 +91,7 @@
     .club-name {
         display: none; /* Hide text, show only logo */
     }
-    
+
     .club-logo {
         width: 40px;
         height: 40px;
@@ -210,7 +210,7 @@
             display: flex;
             align-items: center;
         }
-        
+
         .club-logo {
             width: 40px;
             height: 40px;
@@ -445,12 +445,12 @@
             .card-body {
                 padding: 1.5rem;
             }
-            
+
             .btn-primary, .btn-outline-primary {
                 width: 100%;
                 margin-bottom: 0.5rem;
             }
-            
+
             body {
                 font-size: 0.95rem;
             }
@@ -483,7 +483,7 @@
         }
 
         /* Arabic number inputs */
-        input[type="number"], 
+        input[type="number"],
         input[type="tel"] {
             direction: ltr;
             text-align: left;
@@ -526,11 +526,11 @@
             </div>
             <span class="club-name">النادي الثقافي لشباب لبير</span>
         </a>
-            
+
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            
+
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     {% if user.is_authenticated %}
@@ -554,14 +554,14 @@
                                 </a>
                             </li>
                         {% endif %}
-                        
+
                         {% if user.is_admin %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'poll_management' %}">
                                     <i class="fas fa-list ms-1"></i>
                                     الاستطلاعات
                                 </a>
-                          
+
                         {% endif %}
                     <li class="nav-item">
                             <a class="nav-link" href="{% url 'teams_list' %}">
@@ -595,9 +595,15 @@
                                 تسجيل
                             </a>
                         </li>
+                          <li class="nav-item">
+        <a class="nav-link" href="{% url 'resend_verification' %}">
+            <i class="fas fa-mobile-alt ms-1"></i>
+            تأكيد الهاتف
+        </a>
+    </li>
                     {% endif %}
                 </ul>
-                
+
                 {% if user.is_authenticated %}
                     <span class="navbar-text text-white">
                         <i class="fas fa-user-circle ms-1"></i>
@@ -643,7 +649,7 @@
                 </div>
                 <div class="mt-2">
                     <small class="">
-                 Made with ❤️ by Loq - تم التطوير لخدمة أعضاء النادي        © 2025 
+                 Made with ❤️ by Loq - تم التطوير لخدمة أعضاء النادي        © 2025
                     </small>
                 </div>
             </div>
@@ -652,7 +658,7 @@
 
     <!-- Bootstrap 5 JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    
+
     <!-- Simple JavaScript -->
     <script>
         // Auto-hide alerts after 5 seconds
