@@ -33,4 +33,5 @@ urlpatterns = [
      path('resend-verification/', views.resend_verification_view, name='resend_verification'),
     # AJAX URLs
     path('ajax/resend-otp/', views.resend_otp_view, name='resend_otp'),
+    path('vote-admin/poll/<uuid:poll_id>/vote-details/', views.poll_vote_details_view, name='poll_vote_details'),
 ]

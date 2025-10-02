@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}تفاصيل التصويت - {{ poll.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-danger text-white">
+            <h3><i class="fas fa-user-secret ms-2"></i>تفاصيل التصويت (للمسؤول الأعلى فقط)</h3>
+            <p class="mb-0">{{ poll.title }}</p>
+        </div>
+        
+        <div class="card-body">
+            <!-- Search -->
+            <form method="get" class="mb-3">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" 
+                           placeholder="بحث بالاسم أو رقم الهاتف" 
+                           value="{{ search_query }}">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+            
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle ms-2"></i>
+                هذه المعلومات سرية للغاية ومتاحة للمسؤول الأعلى فقط
+            </div>
+            
+            <!-- Votes Table -->
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>الاسم الكامل</th>
+                            <th>رقم الهاتف</th>
+                            <th>الخيار المختار</th>
+                            <th>وقت التصويت</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vote in page_obj %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ vote.user.full_name }}</td>
+                            <td>{{ vote.user.phone_number }}</td>
+                            <td><strong class="text-primary">{{ vote.option.option_text }}</strong></td>
+                            <td>{{ vote.voted_at|date:"Y-m-d H:i" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">لا توجد نتائج</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            <nav>
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}">السابق</a>
+                    </li>
+                    {% endif %}
+                    
+                    <li class="page-item disabled">
+                        <span class="page-link">{{ page_obj.number }} من {{ page_obj.paginator.num_pages }}</span>
+                    </li>
+                    
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search_query }}">التالي</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+            
+            <div class="mt-4">
+                <a href="{% url 'poll_results' poll.id %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-right ms-2"></i>العودة للنتائج
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

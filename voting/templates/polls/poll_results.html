@@ -9,7 +9,7 @@
     body {
         background: var(--gradient-light);
     }
-    
+
     .results-container {
         background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(10px);
@@ -19,7 +19,7 @@
         margin: 20px 0;
         border: 1px solid rgba(0, 0, 0, 0.05);
     }
-    
+
     .poll-header {
         background: var(--gradient-blue);
         color: white;
@@ -37,7 +37,7 @@
         background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><defs><pattern id="p" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1" height="10" fill="white" opacity="0.1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23p)"/></svg>');
         animation: float 20s infinite linear;
     }
-    
+
     @keyframes float {
         0% { transform: translate(0, 0); }
         100% { transform: translate(-50px, -50px); }
@@ -45,7 +45,7 @@
         .print-header {
         display: none;
     }
-    
+
     .poll-title {
         font-size: 2.2rem;
         font-weight: 700;
@@ -53,14 +53,14 @@
         position: relative;
         text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     }
-    
+
     .poll-description {
         font-size: 1.1rem;
         opacity: 0.9;
         position: relative;
         margin-bottom: 20px;
     }
-    
+
     .status-badge {
         background: rgba(255, 255, 255, 0.2);
         border: 1px solid rgba(255, 255, 255, 0.3);
@@ -71,13 +71,13 @@
         display: inline-block;
         position: relative;
     }
-    
+
     .stats-grid {
         background: white;
         padding: 40px 30px;
         border-bottom: 1px solid #e2e8f0;
     }
-    
+
     .stat-card {
         background: linear-gradient(145deg, #f8fafc, #e2e8f0);
         border-radius: 20px;
@@ -87,13 +87,13 @@
         border: 1px solid #e2e8f0;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
-    
+
     .stat-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
         border-color: var(--primary-blue);
     }
-    
+
     .stat-number {
         font-size: 2.5rem;
         font-weight: 800;
@@ -103,7 +103,7 @@
         -webkit-text-fill-color: transparent;
         background-clip: text;
     }
-    
+
     .stat-label {
         font-size: 0.9rem;
         color: #64748b;
@@ -111,13 +111,13 @@
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
-    
+
     .chart-section, .results-list {
         background: white;
         padding: 40px 30px;
         border-bottom: 1px solid #e2e8f0;
     }
-    
+
     .chart-container {
         background: linear-gradient(145deg, #f8fafc, #f1f5f9);
         border-radius: 20px;
@@ -126,7 +126,7 @@
         border: 1px solid #e2e8f0;
         box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
     }
-    
+
     .chart-tabs {
         display: flex;
         justify-content: center;
@@ -134,7 +134,7 @@
         margin-bottom: 30px;
         flex-wrap: wrap;
     }
-    
+
     .chart-tab {
         background: rgba(37, 99, 235, 0.08);
         border: 2px solid rgba(37, 99, 235, 0.2);
@@ -147,7 +147,7 @@
         position: relative;
         overflow: hidden;
     }
-    
+
     .chart-tab::before {
         content: '';
         position: absolute;
@@ -158,11 +158,11 @@
         background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
         transition: left 0.5s;
     }
-    
+
     .chart-tab:hover::before {
         left: 100%;
     }
-    
+
     .chart-tab.active {
         background: linear-gradient(135deg, #2563eb, #1d4ed8);
         color: white;
@@ -170,13 +170,13 @@
         box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
         transform: translateY(-2px);
     }
-    
+
     .chart-tab:hover:not(.active) {
         background: rgba(37, 99, 235, 0.12);
         border-color: rgba(37, 99, 235, 0.3);
         transform: translateY(-2px);
     }
-    
+
     .result-item {
         background: linear-gradient(145deg, #ffffff, #f8fafc);
         border-radius: 20px;
@@ -187,7 +187,7 @@
         position: relative;
         overflow: hidden;
     }
-    
+
     .result-item::before {
         content: '';
         position: absolute;
@@ -198,17 +198,17 @@
         background: linear-gradient(90deg, #2563eb, #3b82f6);
         transition: left 0.8s ease;
     }
-    
+
     .result-item:hover::before {
         left: 100%;
     }
-    
+
     .result-item:hover {
         transform: translateY(-5px) scale(1.01);
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
         border-color: #3b82f6;
     }
-    
+
     .result-header {
         display: flex;
         justify-content: space-between;
@@ -217,7 +217,7 @@
         flex-wrap: wrap;
         gap: 10px;
     }
-    
+
     .option-text {
         font-weight: 600;
         font-size: 1.1rem;
@@ -226,20 +226,20 @@
         align-items: center;
         gap: 10px;
     }
-    
+
     .winner-crown {
         color: #f59e0b;
         font-size: 1.3rem;
         animation: bounce 2s infinite;
         filter: drop-shadow(0 2px 4px rgba(245, 158, 11, 0.3));
     }
-    
+
     @keyframes bounce {
         0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
         40% { transform: translateY(-10px); }
         60% { transform: translateY(-5px); }
     }
-    
+
     .vote-info {
         background: linear-gradient(135deg, #ffffff, #f0f9ff);
         padding: 12px 24px;
@@ -249,7 +249,7 @@
         border: 2px solid rgba(37, 99, 235, 0.2);
         box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
     }
-    
+
     .result-item {
             background: linear-gradient(145deg, #ffffff, #f8fafc);
             border-radius: 20px;
@@ -260,7 +260,7 @@
             position: relative;
             overflow: hidden;
         }
-        
+
         .progress-container {
             background: #e2e8f0;
             border-radius: 15px;
@@ -269,7 +269,7 @@
             position: relative;
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        
+
         .progress-bar {
             height: 100%;
             border-radius: 15px;
@@ -286,7 +286,7 @@
             overflow: hidden;
             width: 0%; /* Start at 0 */
         }
-        
+
         .progress-bar::before {
             content: '';
             position: absolute;
@@ -297,24 +297,24 @@
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
             animation: shimmer 3s infinite;
         }
-        
+
         @keyframes shimmer {
             0% { left: -100%; }
             100% { left: 100%; }
         }
-    
+
     @keyframes shimmer {
         0% { left: -100%; }
         100% { left: 100%; }
     }
-    
+
     .no-votes {
         text-align: center;
         padding: 80px 30px;
         color: #64748b;
         background: white;
     }
-    
+
     .no-votes-icon {
         font-size: 5rem;
         margin-bottom: 25px;
@@ -322,12 +322,12 @@
         color: #3b82f6;
         animation: pulse 3s infinite;
     }
-    
+
     @keyframes pulse {
         0%, 100% { opacity: 0.4; }
         50% { opacity: 0.6; }
     }
-    
+
     .actions-section {
         background: linear-gradient(135deg, #f8fafc, #f1f5f9);
         padding: 30px;
@@ -343,18 +343,18 @@
         border-radius: 15px;
         margin-top: 20px;
     }
-    
+
     .refresh-indicator {
         display: inline-block;
         animation: spin 2s linear infinite;
         margin-left: 8px;
     }
-    
+
     @keyframes spin {
         from { transform: rotate(0deg); }
         to { transform: rotate(360deg); }
     }
-    
+
     .section-title {
         font-size: 1.8rem;
         font-weight: 700;
@@ -364,7 +364,7 @@
         position: relative;
         padding-bottom: 20px;
     }
-    
+
     .section-title::after {
         content: '';
         position: absolute;
@@ -376,7 +376,7 @@
         background: linear-gradient(135deg, #3b82f6, #2563eb);
         border-radius: 2px;
     }
-    
+
     /* Print Styles - Enhanced */
    /* ================== PRINT-ONLY STYLES ================== */
 /* ================== PRINT-ONLY STYLES ================== */
@@ -389,10 +389,10 @@
 
     /* Hide screen content completely */
     .results-container,
-    nav, 
-    footer, 
-    .actions-section, 
-    .auto-refresh, 
+    nav,
+    footer,
+    .actions-section,
+    .auto-refresh,
     .chart-tabs,
     .btn,
     button {
@@ -782,9 +782,9 @@
         display: none !important;
     }
 }
-    
 
-    
+
+
     /* Responsive Design */
     @media (max-width: 767px) {
         .poll-title { font-size: 1.8rem; }
@@ -819,8 +819,13 @@
                 <i class="fas fa-circle text-secondary ms-2"></i>التصويت منتهي
             {% endif %}
         </div>
-    </div>
 
+    </div>
+   {% if user.is_super_admin %}
+    <a href="{% url 'poll_vote_details' poll.id %}" class="btn btn-danger">
+        <i class="fas fa-user-secret ms-2"></i>تفاصيل التصويت (سري)
+    </a>
+{% endif %}
     <!-- Statistics Grid -->
     <div class="stats-grid">
         <div class="row g-3 g-lg-4">
@@ -863,7 +868,7 @@
         <!-- Charts Section -->
         <div class="chart-section">
             <h2 class="section-title">الرسوم البيانية</h2>
-            
+
             <div class="chart-tabs">
                 <div class="chart-tab active" data-chart-type="doughnut">
                     <i class="fas fa-chart-pie ms-2"></i>دائري
@@ -887,7 +892,7 @@
         <!-- Results List -->
         <div class="results-list">
             <h2 class="section-title">النتائج التفصيلية</h2>
-            
+
             {% for result in options_with_results %}
                 <div class="result-item">
                     <div class="result-header">
@@ -903,7 +908,7 @@
                         </div>
                     </div>
                     <div class="progress-container">
-                        <div class="progress-bar" 
+                        <div class="progress-bar"
                              style="width: 0%"
                              data-width="{{ result.percentage }}%">
                             <span class="progress-text">{{ result.percentage|floatformat:1 }}%</span>
@@ -968,7 +973,7 @@
         <div class="print-meta-info">
             <div class="print-date">تاريخ التقرير: <span id="printReportDate"></span></div>
             <div class="print-status">
-                الحالة: 
+                الحالة:
                 {% if poll.is_active %}
                     التصويت مفتوح
                 {% else %}
@@ -990,6 +995,30 @@
                 <span class="print-stat-label">عدد الخيارات:</span>
                 <span class="print-stat-value">{{ poll.options.count }}</span>
             </div>
+            <div class="print-stat-item">
+    <span class="print-stat-label">عدد المسجلين:</span>
+    <span class="print-stat-value">{{ total_registered_users }}</span>
+</div>
+<div class="print-stat-item">
+    <span class="print-stat-label">عدد المصوتين:</span>
+    <span class="print-stat-value">{{ unique_voters }}</span>
+</div>
+<div class="print-stat-item">
+    <span class="print-stat-label">نسبة المشاركة:</span>
+    <span class="print-stat-value">{{ participation_rate }}%</span>
+</div>
+<div class="print-stat-item">
+    <span class="print-stat-label">الأصوات الصحيحة:</span>
+    <span class="print-stat-value">{{ valid_votes }}</span>
+</div>
+<div class="print-stat-item">
+    <span class="print-stat-label">الأصوات الملغاة:</span>
+    <span class="print-stat-value">{{ invalid_votes }}</span>
+</div>
+<div class="print-stat-item">
+    <span class="print-stat-label">الأصوات الحيادية:</span>
+    <span class="print-stat-value">{{ neutral_votes }}</span>
+</div>
             <div class="print-stat-item">
                 <span class="print-stat-label">أعلى تصويت:</span>
                 <span class="print-stat-value">
@@ -1092,7 +1121,7 @@ const chartData = {
 // Enhanced color palette
 const themeColors = [
     'rgba(59, 130, 246, 0.8)',   // Blue
-    'rgba(16, 185, 129, 0.8)',   // Green  
+    'rgba(16, 185, 129, 0.8)',   // Green
     'rgba(245, 158, 11, 0.8)',   // Yellow
     'rgba(239, 68, 68, 0.8)',    // Red
     'rgba(139, 92, 246, 0.8)',   // Purple
@@ -1137,7 +1166,7 @@ function createChart(type) {
                 legend: {
                     display: type === 'doughnut',
                     position: 'bottom',
-                    labels: { 
+                    labels: {
                         font: { family: 'Cairo, sans-serif', size: 13, weight: '600' },
                         padding: 20,
                         usePointStyle: true,
@@ -1191,18 +1220,18 @@ function createChart(type) {
         const isHorizontal = type === 'horizontalBar';
         config.options.indexAxis = isHorizontal ? 'y' : 'x';
         config.options.scales = {
-            [isHorizontal ? 'x' : 'y']: { 
-                beginAtZero: true, 
+            [isHorizontal ? 'x' : 'y']: {
+                beginAtZero: true,
                 grid: { color: 'rgba(0, 0, 0, 0.1)' },
-                ticks: { 
-                    stepSize: 1, 
+                ticks: {
+                    stepSize: 1,
                     font: { family: 'Cairo, sans-serif', size: 12 },
                     color: '#374151'
                 }
             },
-            [isHorizontal ? 'y' : 'x']: { 
+            [isHorizontal ? 'y' : 'x']: {
                 grid: { display: false },
-                ticks: { 
+                ticks: {
                     font: { family: 'Cairo, sans-serif', size: 12 },
                     color: '#374151'
                 }
@@ -1219,20 +1248,20 @@ function createChart(type) {
         config.data.datasets[0].pointRadius = 8;
         config.data.datasets[0].pointHoverRadius = 12;
         config.data.datasets[0].tension = 0.4;
-        
+
         config.options.scales = {
-            y: { 
+            y: {
                 beginAtZero: true,
                 grid: { color: 'rgba(0, 0, 0, 0.1)' },
-                ticks: { 
+                ticks: {
                     stepSize: 1,
                     font: { family: 'Cairo, sans-serif', size: 12 },
                     color: '#374151'
                 }
             },
-            x: { 
+            x: {
                 grid: { display: false },
-                ticks: { 
+                ticks: {
                     font: { family: 'Cairo, sans-serif', size: 12 },
                     color: '#374151'
                 }
@@ -1262,29 +1291,29 @@ function switchChartType(type, activeTab) {
 // Replace your animateProgressBars function with this fixed version:
 function animateProgressBars() {
     const progressBars = document.querySelectorAll('.progress-bar');
-    
+
     if (progressBars.length === 0) {
         console.log('No progress bars found');
         return;
     }
-    
+
     console.log(`Found ${progressBars.length} progress bars to animate`);
-    
+
     // Reset all bars to 0% first
     progressBars.forEach(bar => {
         bar.style.transition = 'none'; // Disable transition temporarily
         bar.style.width = '0%';
     });
-    
+
     // Force browser to apply the 0% width
     void document.body.offsetHeight;
-    
+
     // Re-enable transitions and animate
     setTimeout(() => {
         progressBars.forEach((bar, index) => {
             // Re-enable transition
             bar.style.transition = 'width 2s cubic-bezier(0.4, 0, 0.2, 1)';
-            
+
             // Stagger the animations
             setTimeout(() => {
                 const rawWidth = bar.getAttribute('data-width');
@@ -1352,9 +1381,9 @@ function updateTimeRemaining() {
 function populatePrintBars() {
     const screenBars = document.querySelectorAll('.results-list .progress-bar');
     const printBars = document.querySelectorAll('.print-bar');
-    
+
     console.log(`Found ${screenBars.length} screen bars and ${printBars.length} print bars`);
-    
+
     // Copy widths from screen bars to print bars
     screenBars.forEach((screenBar, index) => {
         if (printBars[index]) {
@@ -1383,10 +1412,10 @@ function debugPrintBars() {
 function printResults() {
     // Populate print bars with correct widths
     populatePrintBars();
-    
+
     // Debug bars after populating
     debugPrintBars();
-    
+
     // Capture chart first, then prepare other data
     captureChartForPrint()
         .then(() => {
@@ -1424,7 +1453,7 @@ function captureChartForPrint() {
 
             // Create high-quality image
             const dataURL = currentChart.toBase64Image('image/png', 1.0);
-            
+
             // Set the image source for print
             const printChartImg = document.getElementById('printChartImage');
             if (printChartImg) {
@@ -1432,7 +1461,7 @@ function captureChartForPrint() {
                 printChartImg.style.display = 'block';
                 console.log('Chart captured successfully for print');
             }
-            
+
             resolve();
         } catch (error) {
             console.error('Error capturing chart:', error);
@@ -1444,7 +1473,7 @@ function captureChartForPrint() {
 function preparePrintData() {
     // Set current date and time for print
     const now = new Date();
-    
+
     // Format date for Arabic locale
     const reportDate = now.toLocaleDateString('ar-EG', {
         year: 'numeric',
@@ -1452,7 +1481,7 @@ function preparePrintData() {
         day: 'numeric',
         weekday: 'long'
     });
-    
+
     const generationTime = now.toLocaleString('ar-EG', {
         year: 'numeric',
         month: '2-digit',
@@ -1462,19 +1491,19 @@ function preparePrintData() {
         second: '2-digit',
         hour12: false
     });
-    
+
     // Update print elements
     const reportDateEl = document.getElementById('printReportDate');
     const generationTimeEl = document.getElementById('printGenerationTime');
-    
+
     if (reportDateEl) {
         reportDateEl.textContent = reportDate;
     }
-    
+
     if (generationTimeEl) {
         generationTimeEl.textContent = generationTime;
     }
-    
+
     console.log('Print data prepared successfully');
 }
 
@@ -1482,7 +1511,7 @@ function preparePrintData() {
 window.addEventListener('beforeprint', () => {
     // Populate print bars with correct widths
     populatePrintBars();
-    
+
     // Capture chart if not already done
     if (currentChart && !document.getElementById('printChartImage').src) {
         captureChartForPrint().then(() => {
@@ -1506,7 +1535,7 @@ function copyResults() {
     text += `حالة الاستطلاع: {% if poll.is_active %}مفتوح{% else %}منتهي{% endif %}\n\n`;
     text += `النتائج التفصيلية:\n`;
     text += `${'='.repeat(40)}\n`;
-    
+
     {% for result in options_with_results %}
     const percentage{{ forloop.counter }} = parseFloat('{{ result.percentage|floatformat:2|unlocalize }}');
     text += `${{ forloop.counter }}. {{ result.option.option_text|escapejs }}\n`;
@@ -1563,7 +1592,7 @@ function exportResults() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
+
     showNotification('تم تصدير البيانات بنجاح!', 'success');
 }
 
@@ -1572,9 +1601,9 @@ function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
     notification.className = `alert alert-${type === 'success' ? 'success' : 'info'} alert-dismissible fade show position-fixed`;
     notification.style.cssText = `
-        top: 20px; 
-        right: 20px; 
-        z-index: 1055; 
+        top: 20px;
+        right: 20px;
+        z-index: 1055;
         min-width: 300px;
         border-radius: 15px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.2);
@@ -1602,7 +1631,7 @@ function showNotification(message, type = 'info') {
 // Replace your DOMContentLoaded event listener with this:
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Initializing poll results page...');
-    
+
     // Animate counter
     const totalVotesElement = document.getElementById('totalVotesCounter');
     if (totalVotesElement) {
@@ -1610,7 +1639,7 @@ document.addEventListener('DOMContentLoaded', function() {
             animateCounter(totalVotesElement, {{ total_votes }});
         }, 300);
     }
-    
+
     // Animate progress bars - ONLY CALL ONCE with proper timing
     if ({{ total_votes }} > 0) {
         // Wait for DOM to be fully painted
@@ -1619,13 +1648,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 animateProgressBars();
             }, 500);
         });
-        
+
         // Initialize chart
         setTimeout(() => {
             createChart('doughnut');
         }, 1000);
     }
-    
+
     // Set up event listeners for chart tabs
     document.querySelectorAll('.chart-tab').forEach(tab => {
         tab.addEventListener('click', function() {
@@ -1637,7 +1666,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const printBtn = document.getElementById('printBtn');
     const copyBtn = document.getElementById('copyBtn');
     const exportBtn = document.getElementById('exportBtn');
-    
+
     if (printBtn) printBtn.addEventListener('click', printResults);
     if (copyBtn) copyBtn.addEventListener('click', copyResults);
     if (exportBtn) exportBtn.addEventListener('click', exportResults);
@@ -1646,14 +1675,14 @@ document.addEventListener('DOMContentLoaded', function() {
     {% if poll.is_active %}
         updateTimeRemaining();
         setInterval(updateTimeRemaining, 1000);
-        
+
         // More intelligent auto-refresh
         let refreshTimer = setTimeout(() => {
             if (document.visibilityState === 'visible' && !document.querySelector('.modal.show')) {
                 location.reload();
             }
         }, 30000);
-        
+
         // Clear refresh if user becomes inactive
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'hidden') {
@@ -1661,7 +1690,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     {% endif %}
-    
+
     // Remove the animate classes that might interfere
     // Add them only after progress bars are animated
     setTimeout(() => {
@@ -1671,7 +1700,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Don't add animate classes if they interfere with progress bars
         });
     }, 2000);
-    
+
     console.log('Poll results page initialized successfully');
 });
 
@@ -1680,7 +1709,7 @@ window.addEventListener('beforeprint', () => {
     const now = new Date();
     const printDate = now.toLocaleDateString('ar-EG', {
         year: 'numeric',
-        month: 'long', 
+        month: 'long',
         day: 'numeric',
         hour: '2-digit',
         minute: '2-digit'

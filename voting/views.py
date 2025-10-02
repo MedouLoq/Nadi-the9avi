@@ -49,6 +49,9 @@ from .models import CustomUser, Poll, Option, Vote, OTPLog, Team  # Add Team imp
 # Update the register_view to include full_name
 def register_view(request):
     """User registration with phone number and full name"""
+    if request.user.is_admin():
+        messages.info(request, 'تم توجيهك إلى صفحة النتائج')
+        return redirect('poll_results', poll_id=poll.id)
     if request.user.is_authenticated:
         if request.user.is_admin():
             return redirect('admin_dashboard')
@@ -256,7 +259,7 @@ def print_users_pdf(request):
 @login_required
 def teams_view(request):
     """View all registered teams - Public view"""
-    teams = Team.objects.filter(is_active=True).order_by('name')
+    teams = Team.objects.filter(is_active=True).order_by('created_at')
 
     context = {
         'teams': teams,
@@ -596,22 +599,75 @@ def poll_results_view(request, poll_id):
 
     # NEW: Get the absolute URL for the logo for printing
     logo_url = request.build_absolute_uri(static('club-logo.png'))
-
+     # NEW: Calculate additional statistics
+    total_registered_users = CustomUser.objects.filter(user_type='user', is_phone_verified=True).count()
+    unique_voters = Vote.objects.filter(poll=poll).values('user').distinct().count()
+    participation_rate = round((unique_voters / total_registered_users * 100) if total_registered_users > 0 else 0, 1)
+    valid_votes = total_votes  # All votes in your system are valid
+    invalid_votes = 0  # Add logic here if you track invalid votes
+    # Calculate neutral votes
+    neutral_votes = Vote.objects.filter(poll=poll, option__option_text='حيادي').count()
     context = {
         'poll': poll,
         'total_votes': total_votes,
         'options_with_results': sorted_options_with_results,
         'user_vote': user_vote,
         'logo_url': logo_url, # NEW: Pass the logo URL to the template
+         'total_registered_users': total_registered_users,
+    'unique_voters': unique_voters,
+    'participation_rate': participation_rate,
+    'valid_votes': valid_votes,
+    'invalid_votes': invalid_votes,
+      'neutral_votes': neutral_votes,  # NEW
     }
 
     return render(request, 'polls/poll_results.html', context)
 
+
+@login_required
+def poll_vote_details_view(request, poll_id):
+    """View detailed vote information - SUPER ADMIN ONLY"""
+    if not request.user.is_super_admin():
+        messages.error(request, 'هذه الصفحة متاحة للمسؤول الأعلى فقط')
+        return redirect('poll_results', poll_id=poll_id)
+
+    poll = get_object_or_404(Poll, id=poll_id)
+
+    # Get all votes with user info
+    votes = Vote.objects.filter(poll=poll).select_related('user', 'option').order_by('-voted_at')
+
+    # Search functionality
+    search_query = request.GET.get('search', '')
+    if search_query:
+        votes = votes.filter(
+            Q(user__full_name__icontains=search_query) |
+            Q(user__phone_number__icontains=search_query)
+        )
+
+    # Pagination
+    paginator = Paginator(votes, 50)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'poll': poll,
+        'page_obj': page_obj,
+        'search_query': search_query,
+        'total_votes': votes.count(),
+    }
+
+    return render(request, 'admin/poll_vote_details.html', context)
+
 # Update the poll_detail_view to remove results redirect for normal users
 @login_required
 def poll_detail_view(request, poll_id):
-    """Poll detail and voting"""
+    """Poll detail and voting - NORMAL USERS ONLY"""
     poll = get_object_or_404(Poll, id=poll_id)
+
+    # NEW: Redirect admins to results page instead
+    if request.user.is_admin():
+        messages.info(request, 'تم توجيهك إلى صفحة النتائج')
+        return redirect('poll_results', poll_id=poll.id)
 
     # Check if user already voted
     user_vote = Vote.objects.filter(poll=poll, user=request.user).first()
@@ -640,12 +696,7 @@ def poll_detail_view(request, poll_id):
             )
 
             messages.success(request, 'تم تسجيل صوتك بنجاح!')
-
-            # Normal users go back to dashboard after voting, not to results
-            if request.user.is_admin():
-                return redirect('poll_results', poll_id=poll.id)
-            else:
-                return redirect('dashboard')
+            return redirect('dashboard')
 
         except Option.DoesNotExist:
             messages.error(request, 'الخيار المحدد غير صحيح')
@@ -654,7 +705,7 @@ def poll_detail_view(request, poll_id):
         'poll': poll,
         'user_vote': user_vote,
         'can_vote': poll.is_active() and not user_vote,
-        'can_view_results': request.user.is_admin(),  # Add this flag
+        'can_view_results': False,  # Normal users can't see results
     }
 
     return render(request, 'polls/poll_detail.html', context)
@@ -703,7 +754,7 @@ def create_poll_view(request):
         return redirect('admin_dashboard')
 
     # Get available teams
-    available_teams = Team.objects.filter(is_active=True).order_by('name')
+    available_teams = Team.objects.filter(is_active=True).order_by('created_at')
 
     if request.method == 'POST':
         title = request.POST.get('title')
